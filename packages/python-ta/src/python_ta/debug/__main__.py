@@ -6,6 +6,15 @@ import click
 from .snapshot import run_with_snapshots
 
 
+def _split_comma_list(
+    _ctx: click.Context, _param: click.Parameter, value: Optional[str]
+) -> Optional[list[str]]:
+    """Split a comma-separated option value into a list of non-empty, stripped strings."""
+    if value is None:
+        return None
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
 @click.group()
 def main() -> None:
     """Run Python files with PythonTA debug features enabled."""
@@ -27,29 +36,31 @@ def main() -> None:
 @click.option(
     "--include-frame",
     "include_frames",
-    multiple=True,
-    help="Only capture variables from this function. Can be repeated.",
+    callback=_split_comma_list,
+    help="Only capture variables from the given functions, as a comma-separated list "
+    "(e.g. func1,func2).",
 )
 @click.option(
     "--exclude-frame",
     "exclude_frames",
-    multiple=True,
-    help="Do not capture variables from this function. Can be repeated.",
+    callback=_split_comma_list,
+    help="Do not capture variables from the given functions, as a comma-separated list "
+    "(e.g. func1,func2).",
 )
 @click.option(
     "--exclude-var",
     "exclude_vars",
-    multiple=True,
-    help="Do not capture this variable. Can be repeated.",
+    callback=_split_comma_list,
+    help="Do not capture the given variables, as a comma-separated list (e.g. x,y).",
 )
 def snapshot(
     file: str,
     save: bool,
     memory_viz_args: Optional[str],
     memory_viz_version: Optional[str],
-    include_frames: tuple[str, ...],
-    exclude_frames: tuple[str, ...],
-    exclude_vars: tuple[str, ...],
+    include_frames: Optional[list[str]],
+    exclude_frames: Optional[list[str]],
+    exclude_vars: Optional[list[str]],
 ) -> None:
     """Run FILE with snapshot comments (# pyta: snapshot(...)) enabled.
 
@@ -62,11 +73,11 @@ def snapshot(
     if memory_viz_version is not None:
         kwargs["memory_viz_version"] = memory_viz_version
     if include_frames:
-        kwargs["include_frames"] = list(include_frames)
+        kwargs["include_frames"] = include_frames
     if exclude_frames:
-        kwargs["exclude_frames"] = list(exclude_frames)
+        kwargs["exclude_frames"] = exclude_frames
     if exclude_vars:
-        kwargs["exclude_vars"] = list(exclude_vars)
+        kwargs["exclude_vars"] = exclude_vars
 
     run_with_snapshots(file, **kwargs)
 

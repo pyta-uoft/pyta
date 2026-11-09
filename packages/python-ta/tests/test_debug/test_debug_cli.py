@@ -102,8 +102,8 @@ class TestDebugCLI:
 
     @patch("python_ta.debug.__main__.run_with_snapshots")
     def test_snapshot_frame_and_var_filters(self, mock_run_with_snapshots, tmp_path):
-        """Test that repeated --include-frame, --exclude-frame and --exclude-var options are
-        passed to run_with_snapshots as lists."""
+        """Test that comma-separated --include-frame, --exclude-frame and --exclude-var options
+        are passed to run_with_snapshots as lists."""
         path = tmp_path / "demo.py"
         path.touch()
 
@@ -113,15 +113,11 @@ class TestDebugCLI:
                 "snapshot",
                 str(path),
                 "--include-frame",
-                "func",
-                "--include-frame",
-                "helper",
+                "func,helper",
                 "--exclude-frame",
                 "_private",
                 "--exclude-var",
-                "x",
-                "--exclude-var",
-                "y",
+                "x, y,",
             ],
         )
 

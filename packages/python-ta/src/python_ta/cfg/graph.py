@@ -540,20 +540,3 @@ class Z3Environment:
             )
         except (Z3Exception, Z3ParseException):
             return None
-
-
-def _get_vars(expr: ExprRef) -> Set[str]:
-    """Retrieve all z3 variables from a z3 expression"""
-    from z3 import Z3_OP_UNINTERPRETED, is_const
-
-    variables: set[str] = set()
-
-    def traverse(e: ExprRef) -> None:
-        if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:
-            variables.add(e.decl().name())
-        elif hasattr(e, "children"):
-            for child in e.children():
-                traverse(child)
-
-    traverse(expr)
-    return variables

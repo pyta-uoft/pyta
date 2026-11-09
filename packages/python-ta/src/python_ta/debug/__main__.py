@@ -13,7 +13,12 @@ def main() -> None:
 
 @main.command()
 @click.argument("file", type=click.Path(exists=True, dir_okay=False))
-@click.option("--no-save", is_flag=True, help="Do not save a MemoryViz diagram for each snapshot.")
+@click.option(
+    "--save/--no-save",
+    default=True,
+    show_default=True,
+    help="Whether to save a MemoryViz diagram for each snapshot.",
+)
 @click.option(
     "--memory-viz-args",
     help='Options passed to the MemoryViz CLI, as one quoted string (e.g. "--width 1000").',
@@ -39,7 +44,7 @@ def main() -> None:
 )
 def snapshot(
     file: str,
-    no_save: bool,
+    save: bool,
     memory_viz_args: Optional[str],
     memory_viz_version: Optional[str],
     include_frames: tuple[str, ...],
@@ -51,9 +56,7 @@ def snapshot(
     Options set the default arguments for every snapshot comment. Arguments given in a
     snapshot comment override them.
     """
-    kwargs: dict[str, Any] = {}
-    if no_save:
-        kwargs["save"] = False
+    kwargs: dict[str, Any] = {"save": save}
     if memory_viz_args is not None:
         kwargs["memory_viz_args"] = shlex.split(memory_viz_args)
     if memory_viz_version is not None:

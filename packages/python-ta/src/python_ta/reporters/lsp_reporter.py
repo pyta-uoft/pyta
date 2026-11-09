@@ -17,6 +17,18 @@ CATEGORY_TO_LSP = {
     "refactor": types.DiagnosticSeverity.Hint,
 }
 
+# Deprecation-related checks, including disabled checks.
+DEPRECATION_CHECKS = {
+    "deprecated-module",
+    "deprecated-method",
+    "deprecated-argument",
+    "deprecated-class",
+    "deprecated-decorator",
+    "deprecated-attribute",
+    "deprecated-pragma",
+    "deprecated-typing-alias",
+}
+
 
 def _lsp_severity(category: str) -> types.DiagnosticSeverity:
     """Convert the Pylint category to DiagnosticSeverity type, return default of warning"""
@@ -71,6 +83,11 @@ class LSPReporter(PythonTaReporter):
                     code=msg.msg_id,
                     code_description=types.CodeDescription(href=get_documentation_url(msg.msg_id)),
                     source="python-ta",
+                    tags=(
+                        [types.DiagnosticTag.Deprecated]
+                        if msg.symbol in DEPRECATION_CHECKS
+                        else None
+                    ),
                 )
                 diagnostics_list.append(diag)
 

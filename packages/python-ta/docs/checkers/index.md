@@ -309,6 +309,26 @@ a = ['p', 'y', 'T', 'A']
 print(a[0:3])
 ```
 
+(E1129)=
+
+### Not context manager (E1129)
+
+This error occurs when an object used in a `with` statement does not support the context manager
+protocol. A context manager must provide both `__enter__` and `__exit__` methods.
+
+```{literalinclude} /../../../examples/pylint/e1129_not_context_manager.py
+
+```
+
+Use an object that supports this protocol, such as a file returned by `open`.
+
+Corrected version:
+
+```python
+with open('data.txt', encoding='utf-8') as data_file:
+    contents = data_file.read()
+```
+
 (E1130)=
 
 ### Invalid unary operand type (E1130)
@@ -399,6 +419,45 @@ named_list = NamedList(['a', 'b', 'c'], [1, 2, 3])
 print('c' in named_list)  # Prints True
 del named_list['c']
 print('c' in named_list)  # Prints False
+```
+
+(E1141)=
+
+### Dict iter missing items (E1141)
+
+This error occurs when we iterate over a dictionary and unpack each item into multiple variables
+without calling `.items()`. Iterating over a dictionary directly produces its keys, rather than
+key-value pairs.
+
+```{literalinclude} /../../../examples/pylint/e1141_dict_iter_missing_items.py
+
+```
+
+Corrected version:
+
+```python
+data = {'x': 1, 'y': 2, 'z': 3}
+for key, value in data.items():
+    print(key, value)
+```
+
+(E1143)=
+
+### Unhashable member (E1143)
+
+This error occurs when we use an unhashable value as a dictionary key or a set member.
+Lists, dictionaries, and sets are unhashable and cannot be used in these contexts.
+
+```{literalinclude} /../../../examples/pylint/e1143_unhashable_member.py
+
+```
+
+Corrected version, using a tuple:
+
+```python
+data = {}
+numbers = (1, 2, 3)
+data[numbers] = True
 ```
 
 (E1144)=
@@ -565,6 +624,141 @@ print(f"Hi! My name is {name}!")
 print(f"{name} is my name!")
 ```
 
+(R0124)=
+
+### Comparison with itself (R0124)
+
+This error occurs when a value is compared with itself, which may indicate that one side of the
+comparison contains the wrong variable.
+
+```{literalinclude} /../../../examples/pylint/r0124_comparison_with_itself.py
+
+```
+
+Corrected version:
+
+```python
+def is_new_high_score(score: int, high_score: int) -> bool:
+    """Return whether score is greater than the current high score."""
+    return score > high_score
+```
+
+(R1701)=
+
+### Consider merging isinstance (R1701)
+
+This error occurs when multiple calls to `isinstance` test the same value against different types.
+Pass the types as a tuple in a single call instead.
+
+```{literalinclude} /../../../examples/pylint/r1701_consider_merging_isinstance.py
+
+```
+
+Corrected version:
+
+```python
+from typing import Any
+
+
+def is_int_or_str(mystery: Any) -> bool:
+    """Return whether mystery is an int or str, or some other type."""
+    return isinstance(mystery, (int, str))
+```
+
+(R1712)=
+
+### Consider swap variables (R1712)
+
+This error occurs when a temporary variable is used only to swap the values of two variables.
+Python supports swapping them directly with parallel assignment.
+
+```{literalinclude} /../../../examples/pylint/r1712_consider_swap_variables.py
+
+```
+
+Corrected version:
+
+```python
+original = 1
+new = 2
+
+original, new = new, original
+```
+
+(R1713)=
+
+### Consider using join (R1713)
+
+This error occurs when strings from a sequence are concatenated one at a time in a loop. Use
+`str.join` to express the operation directly and avoid repeatedly creating intermediate strings.
+
+```{literalinclude} /../../../examples/pylint/r1713_consider_using_join.py
+
+```
+
+Corrected version:
+
+```python
+letters = ['H', 'e', 'l', 'l', 'o']
+word = "".join(letters)
+```
+
+(R1714)=
+
+### Consider using in (R1714)
+
+This error occurs when several equality comparisons test the same value and are joined with `or`.
+Use the `in` operator to test whether the value belongs to a collection of choices.
+
+```{literalinclude} /../../../examples/pylint/r1714_consider_using_in.py
+
+```
+
+Corrected version:
+
+```python
+def f(x: Any) -> bool:
+    """Return whether x is one of a few different values."""
+    return x in {1, "hello", 2.5}
+```
+
+(R1715)=
+
+### Consider using get (R1715)
+
+This error occurs when an `if` statement checks for a dictionary key and selects either its value
+or a default value. The `dict.get` method performs both steps directly.
+
+```{literalinclude} /../../../examples/pylint/r1715_consider_using_get.py
+
+```
+
+Corrected version:
+
+```python
+dictionary = {}
+
+variable = dictionary.get('key', 'default')
+```
+
+(R1716)=
+
+### Chained comparison (R1716)
+
+This error occurs when comparisons joined by `and` repeat the middle value. Python allows the
+comparisons to be written as one chained comparison.
+
+```{literalinclude} /../../../examples/pylint/r1716_chained_comparison.py
+
+```
+
+Corrected version:
+
+```python
+if a < b < c:
+    pass
+```
+
 (R1726)=
 
 ### Simplifiable condition (R1726)
@@ -705,6 +899,41 @@ function/method is too complex, and should be split up.
 
 ```{literalinclude} /../../../examples/pylint/r0912_too_many_branches.py
 
+```
+
+(R0916)=
+
+### Too many boolean expressions (R0916)
+
+This error occurs when an `if` condition contains too many boolean expressions, making it difficult
+to read and understand. Extract meaningful parts into named variables or split the condition into
+branches.
+
+**Note**: The default checker limit is 5 boolean expressions.
+
+```{literalinclude} /../../../examples/pylint/r0916_too_many_boolean_expressions.py
+
+```
+
+Corrected version:
+
+```python
+def check_password(password: str) -> None:
+    """Print whether password is valid."""
+    has_valid_length = len(password) >= 8
+    has_lowercase = any(character.islower() for character in password)
+    has_uppercase = any(character.isupper() for character in password)
+    has_digit = any(character.isdigit() for character in password)
+    has_special_character = any(character in "!@#$" for character in password)
+    has_no_spaces = " " not in password
+
+    has_mixed_case = has_lowercase and has_uppercase
+    has_required_characters = has_digit and has_special_character
+
+    if has_valid_length and has_mixed_case and has_required_characters and has_no_spaces:
+        print("Valid password.")
+    else:
+        print("Invalid password.")
 ```
 
 (R1702)=
@@ -1581,6 +1810,24 @@ This error occurs when we import a module which is not used anywhere in our code
 ```
 
 ## Classes and objects
+
+(R0205)=
+
+### Useless object inheritance (R0205)
+
+This error occurs when a class explicitly inherits from `object`. In Python 3, every class already
+inherits from `object`, so naming it as a base class is unnecessary.
+
+```{literalinclude} /../../../examples/pylint/r0205_useless_object_inheritance.py
+
+```
+
+Corrected version:
+
+```python
+class A:
+    pass
+```
 
 (R0902)=
 
@@ -3131,6 +3378,29 @@ s = "{} and {}".format("first", "second")
 
 **See also**: [E1120](#E1120)
 
+(E1307)=
+
+### Bad string format type (E1307)
+
+This error occurs when a value passed to `%` string formatting has a type that is incompatible
+with its conversion specifier. Use a value of the required type, or change the conversion specifier
+to match the intended value.
+
+For example, `%d` expects a number, but the following code passes a string:
+
+```{literalinclude} /../../../examples/pylint/e1307_bad_string_format_type.py
+
+```
+
+Corrected version:
+
+```python
+print("%d" % 10)
+```
+
+**Note**: PythonTA currently performs this check only for `%` formatting, not for `str.format()`
+or f-strings.
+
 (W1309)=
 
 ### F-string without interpolation (W1309)
@@ -3631,6 +3901,29 @@ class Company:
         return f"A company with {len(self._employees)} employees."
 ```
 
+(E1520)=
+
+### Singledispatchmethod function (E1520)
+
+This error occurs when `functools.singledispatchmethod` decorates a standalone function.
+This decorator is intended for methods in a class. Use `functools.singledispatch` for a standalone
+function instead.
+
+```{literalinclude} /../../../examples/pylint/e1520_singledispatchmethod_function.py
+
+```
+
+Corrected version:
+
+```python
+from functools import singledispatch
+
+
+@singledispatch
+def describe(value):
+    return str(value)
+```
+
 (W1515)=
 
 ### Forgotten debug statement (W1515)
@@ -3866,6 +4159,15 @@ The different types of comparison operators can be classified in the following c
 
 ```
 
+(E2501)=
+
+### Invalid Unicode codec (E2501)
+
+This error occurs when Python source files are encoded using UTF-16 or UTF-32, which are not
+ASCII-compatible source encodings. Save Python source files using UTF-8 instead.
+
+**See also**: [PEP 263: source encoding restrictions][pep263: concepts]
+
 ## Syntax errors
 
 (E0001)=
@@ -3987,6 +4289,27 @@ spam -= 1
 
 See the [Configuration documentation](../usage/configuration.md) for details on configuring PythonTA.
 
+(R0022)=
+
+### Useless option value (R0022)
+
+This error occurs when a Pylint configuration option names a message that has been removed and can
+no longer be enabled or disabled. Remove the obsolete message name from the option's value.
+
+For example, `bad-continuation` is a removed Pylint message and has no effect here:
+
+```ini
+[MESSAGES CONTROL]
+disable = bad-continuation
+```
+
+Corrected version:
+
+```ini
+[MESSAGES CONTROL]
+disable =
+```
+
 (E0011)=
 
 ### Unrecognized inline option (E0011)
@@ -4055,6 +4378,63 @@ Corrected version:
 [tool.python-ta]
 pyta-number-of-messages = 10
 ```
+
+(F0011)=
+
+### Config parse error (F0011)
+
+This error occurs when Pylint cannot parse a configuration file. The accompanying message
+describes the parsing failure, such as a malformed INI section or invalid TOML syntax.
+Fix the configuration file identified in the message.
+
+For example, this INI configuration is missing a closing bracket in the section header:
+
+```ini
+[FORMAT
+max-line-length = 100
+```
+
+Corrected version:
+
+```ini
+[FORMAT]
+max-line-length = 100
+```
+
+## Analysis failures
+
+PythonTA uses Pylint, a tool that analyzes Python code without running it, to detect many of the
+errors described on this page.
+
+These fatal messages indicate that Pylint could not analyze a module, and not necessarily an error
+in the program.
+
+Check that you are using a supported Python version and that PythonTA’s dependencies are installed
+correctly. If you suspect an installation problem, try reinstalling PythonTA in a fresh environment.
+
+If the error persists, please don't hesitate to send an email to \[david at cs dot toronto dot edu\].
+Include the full error message and an example that reproduces the failure.
+
+(F0001)=
+
+### Fatal (F0001)
+
+This error occurs when an internal problem prevents Pylint from analyzing a module, for example
+when it cannot find the module.
+
+(F0002)=
+
+### Astroid error (F0002)
+
+This error occurs when an unexpected error prevents Astroid, Pylint's code analysis library,
+from building its representation of a module. It is usually accompanied by a traceback.
+
+(F0010)=
+
+### Parse error (F0010)
+
+This error occurs when an exception that Astroid can handle prevents it from building its
+representation of a module. The accompanying message provides details about the parsing failure.
 
 ## Older errors
 
@@ -4135,6 +4515,10 @@ function and method calls or definitions.
 [pep8: other recommendations]: https://www.python.org/dev/peps/pep-0008/#other-recommendations
 [pep8: tabs or spaces?]: https://www.python.org/dev/peps/pep-0008/#tabs-or-spaces
 [pep8: whitespace in expressions and statements]: https://www.python.org/dev/peps/pep-0008/#whitespace-in-expressions-and-statements
+
+<!-- PEP 263 -->
+
+[pep263: concepts]: https://peps.python.org/pep-0263/#concepts
 
 <!-- StackOverflow -->
 

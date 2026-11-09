@@ -1,4 +1,4 @@
-dictionary = dict()
+dictionary = {}
 
 if 'key' in dictionary:  # Error on this line
     variable = dictionary['key']

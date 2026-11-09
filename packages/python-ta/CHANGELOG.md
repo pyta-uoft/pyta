@@ -96,6 +96,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Modified `SnapshotTracer` to trace into calls of functions defined in the same module that `SnapshotTracer` is called.
 - Added `webstepper_options` attribute to `SnapshotTracer` to allow configuration options for MemoryViz Webstepper, including the `line_context` option.
 - Modified PyTA CLI to optionally read file contents through standard input by passing the `--stdin` command-line argument or `-` as the filenames argument.
+- Added `Deprecated` tag to `LSPReporter` output for deprecation checks.
 
 ### 💫 New checkers
 

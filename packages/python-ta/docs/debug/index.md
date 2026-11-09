@@ -580,12 +580,12 @@ snapshot(save=True, memory_viz_args=["--width", "1200"])
 
 ### Snapshot comments
 
-Instead of importing and calling `snapshot`, you can write a `# pyta: snapshot(...)` comment where you want to capture memory, and then run the file with `python_ta.debug.run_with_snapshots`. Each snapshot comment is replaced by a call to `snapshot` with the same arguments before the file is run:
+Instead of importing and calling `snapshot`, you can write a `# pyta: snapshot` comment where you want to capture memory, and then run the file with `python_ta.debug.run_with_snapshots`. Each snapshot comment is replaced by a call to `snapshot` before the file is run:
 
 ```python
 # demo.py
 def func(n: int) -> None:
-    nums = [n, n + 1]  # pyta: snapshot(save=True, memory_viz_args=["--output=demo.svg"])
+    nums = [n, n + 1]  # pyta: snapshot
 
 
 message = "Hello, world"
@@ -599,7 +599,15 @@ from python_ta.debug import run_with_snapshots
 run_with_snapshots("demo.py")
 ```
 
-Running `python run_demo.py` saves the memory diagram to `demo.svg`.
+Unlike calling `snapshot` directly, snapshot comments use `save=True` by default, so running `python run_demo.py` writes the memory diagram as an SVG to standard output.
+
+#### Writing snapshot comments
+
+A snapshot comment can be on its own line, or on the same line after a complete statement (as above), in which case the snapshot is taken after that statement runs.
+
+Snapshot comments take the same arguments as `snapshot()`, but they must be passed by keyword (e.g. `# pyta: snapshot(save=False)`, not `# pyta: snapshot(False)`).
+
+#### Running from the command line
 
 You can also run the file from the command line without writing a separate script:
 
@@ -607,7 +615,41 @@ You can also run the file from the command line without writing a separate scrip
 $ python -m python_ta.debug snapshot demo.py
 ```
 
-A snapshot comment can be on its own line, or on the same line after a complete statement (as above), in which case the snapshot is taken after that statement runs. It takes the same arguments as `snapshot()`. Since the return value of a snapshot comment is discarded, you will usually want `save=True`.
+#### Setting default arguments
+
+Keyword arguments passed to `run_with_snapshots` set the default arguments for every snapshot comment in the file. Arguments given in a snapshot comment override them. For example:
+
+```python
+# defaults_demo.py
+a = 1  # pyta: snapshot
+b = 2  # pyta: snapshot(memory_viz_args=["--output=b.svg"])
+```
+
+```python
+# run_defaults_demo.py
+from python_ta.debug import run_with_snapshots
+
+run_with_snapshots("defaults_demo.py", memory_viz_args=["--output=a.svg"])
+```
+
+The first snapshot comment has no arguments, so it uses the default and saves to `a.svg`. The second snapshot comment gives its own `memory_viz_args`, so it saves to `b.svg` instead.
+
+When running from the command line, options given to the command set the defaults instead:
+
+| Option                            | `snapshot()` argument                                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `--save/--no-save`                | `save` (default: `--save`)                                                                        |
+| `--memory-viz-args "ARGS"`        | `memory_viz_args`, split like a shell command (e.g. `"--width 1000 --roughjs-config seed=12345"`) |
+| `--memory-viz-version VERSION`    | `memory_viz_version`                                                                              |
+| `--include-frame NAME1,NAME2,...` | `include_frames`, as a comma-separated list                                                       |
+| `--exclude-frame NAME1,NAME2,...` | `exclude_frames`, as a comma-separated list                                                       |
+| `--exclude-var NAME1,NAME2,...`   | `exclude_vars`, as a comma-separated list                                                         |
+
+For example:
+
+```console
+$ python -m python_ta.debug snapshot demo.py --memory-viz-args "--width 1000" --exclude-var message
+```
 
 ### API
 

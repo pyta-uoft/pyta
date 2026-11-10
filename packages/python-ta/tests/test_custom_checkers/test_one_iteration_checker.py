@@ -481,3 +481,66 @@ class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_while(while_node)
+
+    def test_z3_while_loop_at_end_of_function(self):
+        src = """
+        def func(x: int) -> None:
+            '''
+            Preconditions:
+                - x % 2 == 0
+            '''
+            while x % 2 == 1:
+                print(x)
+                x += 1
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor(z3_enabled=True))
+        while_node = next(mod.nodes_of_class(nodes.While))
+
+        with self.assertNoMessages():
+            self.checker.visit_while(while_node)
+
+    def test_z3_one_iteration_while_loop_at_end_of_function(self):
+        src = """
+        def func(x: int) -> None:
+            '''
+            Preconditions:
+                - x > 5
+            '''
+            while x > 0:
+                if x > 3:
+                    break
+                print(x)
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor(z3_enabled=True))
+        while_node = next(mod.nodes_of_class(nodes.While))
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="one-iteration",
+                node=while_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_while(while_node)
+
+    def test_z3_for_loop_at_end_of_function(self):
+        src = """
+        def func(x: int) -> None:
+            '''
+            Preconditions:
+                - x > 5
+            '''
+            for i in range(x):
+                print(i)
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor(z3_enabled=True))
+        for_node = next(mod.nodes_of_class(nodes.For))
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)

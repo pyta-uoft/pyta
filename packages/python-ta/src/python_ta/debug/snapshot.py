@@ -8,6 +8,7 @@ Also supports running a file with snapshot comments (e.g. "# pyta: snapshot()").
 from __future__ import annotations
 
 import ast
+import functools
 import inspect
 import json
 import logging
@@ -32,7 +33,7 @@ SNAPSHOT_NAME = "snapshot"
 
 SNAPSHOT_ALIAS = "__snapshot__"
 
-PATTERN = re.compile(r"#\s*pyta:\s*(snapshot\(.*\))\s*")
+PATTERN = re.compile(r"#\s*pyta:\s*(snapshot(?:\(.*\))?)\s*")
 
 
 def get_filtered_global_variables(frame: FrameType) -> dict:
@@ -337,19 +338,24 @@ def snapshot_to_json(
     return json_data
 
 
-def run_with_snapshots(path: str) -> None:
-    """Run the given Python file with snapshot comments enabled.
+def run_with_snapshots(path: str, **kwargs: Any) -> None:
+    """Run the given Python file with snapshot comments enabled. Snapshot comments
+    save by default (save=True). Positional arguments are not allowed in snapshot comments.
 
     Args:
         path: The path to the Python file to run.
+        **kwargs: Default arguments passed to every snapshot comment. Keyword arguments given in a comment override these
+            defaults.
     """
     code = compile(transform_snapshot_comments(path), filename=path, mode="exec")
+
+    snapshot_func = functools.partial(snapshot, **{"save": True, **kwargs})
 
     # Add the file's directory to the import path, as running it directly would
     old_path = sys.path[:]
     sys.path.insert(0, os.path.dirname(os.path.abspath(path)))
     try:
-        exec(code, {"__name__": "__main__", "__file__": path, SNAPSHOT_ALIAS: snapshot})
+        exec(code, {"__name__": "__main__", "__file__": path, SNAPSHOT_ALIAS: snapshot_func})
     finally:
         sys.path[:] = old_path
 
@@ -358,6 +364,7 @@ def transform_snapshot_comments(path: str) -> str:
     """Return the source of the given Python file with each snapshot comment replaced by a snapshot call.
 
     Each call replaces its comment on the same line.
+    A bare "snapshot" comment is treated as "snapshot(save=True)".
 
     Args:
         path: The path to the Python file to transform.
@@ -397,8 +404,19 @@ def _edit(
     def error(msg: str) -> SyntaxError:
         return SyntaxError(msg, (filename, line, col + 1, tok.line))
 
-    if not _is_snapshot_call(match.group(1)):
-        raise error(f"invalid snapshot comment: {match.group(1)}")
+    call = match.group(1)
+    if call == SNAPSHOT_NAME:
+        call += "()"
+
+    if not _is_snapshot_call(call):
+        raise error(f"invalid snapshot comment: {call}")
+
+    # If positional arguments are used in the snapshot comment
+    if ast.parse(call, mode="eval").body.args:  # type: ignore[attr-defined]
+        raise error(
+            "snapshot comments only accept keyword arguments, "
+            "e.g. snapshot(save=False) instead of snapshot(False)"
+        )
 
     # If the snapshot comment is on a line by itself
     if col == 0 or tok.line[:col].isspace():
@@ -413,9 +431,9 @@ def _edit(
             raise error("an inline snapshot comment must follow a complete statement")
         replacement = SNAPSHOT_ALIAS if has_semicolon else "; " + SNAPSHOT_ALIAS
 
-    # Replace everything up to the call's "("
-    prefix_len = match.start(1) + len(SNAPSHOT_NAME)
-    return tok.startpos, tok.startpos + prefix_len, replacement
+    # Replace the comment with the call, keeping its arguments
+    call_args = call[len(SNAPSHOT_NAME) :]
+    return tok.startpos, tok.startpos + match.end(1), replacement + call_args
 
 
 def _is_snapshot_call(call: str) -> bool:

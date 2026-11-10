@@ -43,6 +43,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Fixed `python_ta.debug.snapshot` capturing frames outside of `exec` calls by stopping at the first top-level (`<module>`) frame
 - Kept `JSONReporter` and `LSPReporter` standard output valid JSON by logging data-upload status messages to standard error.
 - Fixed false positive `redundant-condition` reports when variables constrained before a loop are reassigned in the loop body
+- Fixed `OneIterationChecker` crashing with an `IndexError` when the `z3` option is enabled and a loop is the last statement in a function
 
 ### 🔧 Internal changes
 

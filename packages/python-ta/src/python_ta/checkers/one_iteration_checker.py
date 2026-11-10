@@ -69,7 +69,9 @@ class OneIterationChecker(BaseChecker):
                 return False
             # check whether the loop body is feasible (the loop has at least one iteration)
             if not any(
-                succ.is_feasible and node.parent_of(succ.target.statements[0])
+                succ.is_feasible
+                and succ.target.statements
+                and node.parent_of(succ.target.statements[0])
                 for succ in start.cfg_block.successors
             ):
                 return False

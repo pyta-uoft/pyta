@@ -287,6 +287,18 @@ class Z3Parser:
         else:
             return None
 
+    def _parse_string_index(
+        self, node: nodes.NodeNG, value: z3.SeqRef
+    ) -> Optional[Union[int, float, z3.ArithRef]]:
+        """
+        Parse a numeric index for a string.
+        Negative indexes are translated to their positive equivalent.
+        """
+        index = self._parse_number_literal(node)
+        if isinstance(index, int) and index < 0:
+            return z3.Length(value) + index
+        return index
+
     def parse_subscript_op(self, node: nodes.Subscript) -> z3.ExprRef:
         """
         Convert an astroid Subscript node to z3 expression.
@@ -300,20 +312,22 @@ class Z3Parser:
             raise Z3ParseException(f"Unhandled subscript operand type {value}")
 
         # handle indexing
-        index = self._parse_number_literal(slice)
-        if isinstance(index, int):
+        index = self._parse_string_index(slice, value)
+        if isinstance(index, (int, z3.ArithRef)):
             return z3.SubString(value, index, 1)
 
         # handle slicing
         if isinstance(slice, nodes.Slice):
-            lower = 0 if slice.lower is None else self._parse_number_literal(slice.lower)
+            lower = 0 if slice.lower is None else self._parse_string_index(slice.lower, value)
             upper = (
-                z3.Length(value) if slice.upper is None else self._parse_number_literal(slice.upper)
+                z3.Length(value)
+                if slice.upper is None
+                else self._parse_string_index(slice.upper, value)
             )
             step = 1 if slice.step is None else self._parse_number_literal(slice.step)
 
             if not (
-                isinstance(lower, int)
+                isinstance(lower, (int, z3.ArithRef))
                 and isinstance(upper, (int, z3.ArithRef))
                 and isinstance(step, int)
             ):

@@ -84,3 +84,20 @@ def test_apply_mod_floordiv_reject_non_ints(left, right) -> None:
     for method in (parser.apply_mod_op, parser.apply_floordiv_op):
         with pytest.raises(Z3ParseException):
             method(left, right)
+
+
+@pytest.mark.parametrize(
+    "source, expected",
+    [
+        ("python[2]", "t"),
+        ("python[-2]", "o"),
+        ("python[-4:-1]", "tho"),
+        ("python[-4:]", "thon"),
+        ("python[:-1]", "pytho"),
+    ],
+)
+def test_parse_subscript_op_with_negative_indexes(source, expected) -> None:
+    """Test that both positive and negative string indexes and slices are supported."""
+    parser = Z3Parser({"python": z3.StringVal("python")})
+    actual = parser.parse_subscript_op(extract_node(source))
+    assert z3.eq(z3.simplify(actual), z3.StringVal(expected))

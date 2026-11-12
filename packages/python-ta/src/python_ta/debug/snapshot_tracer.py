@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import base64
 import copy
 import inspect
@@ -7,6 +8,7 @@ import logging
 import os
 import socket
 import sys
+import tokenize
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Optional
@@ -15,10 +17,12 @@ from jinja2 import Environment, FileSystemLoader
 
 from ..util.servers.one_shot_server import open_html_in_browser
 from .id_tracker import IDTracker
-from .snapshot import snapshot, snapshot_to_json
+from .snapshot import _exec_as_main, snapshot, snapshot_to_json
 
 if TYPE_CHECKING:
     import types
+
+TRACER_ALIAS = "__snapshot_tracer__"
 
 
 class SnapshotTracer:
@@ -207,3 +211,99 @@ class SnapshotTracer:
     def snapshots(self) -> list[dict[str, Any]]:
         """Return the snapshots taken at each line of code."""
         return self._snapshots
+
+
+def run_with_snapshot_tracer(path: str, **kwargs: Any) -> SnapshotTracer:
+    """Run the given Python file with all of its code traced by a SnapshotTracer, as if the
+    whole file were inside a `with SnapshotTracer(...):` block.
+
+    The Webstepper opens by default (webstepper=True) once the file finishes running.
+
+    Args:
+        path: The path to the Python file to run.
+        **kwargs: Keyword arguments passed to SnapshotTracer. Refer to SnapshotTracer for more
+            details.
+
+    Returns:
+        The SnapshotTracer used to trace the file, which holds the snapshots taken.
+    """
+    with tokenize.open(path) as f:
+        source = f.read()
+
+    tree = _wrap_module_in_tracer(ast.parse(source, filename=path))
+    code = compile(tree, filename=path, mode="exec")
+
+    tracer = SnapshotTracer(**{"webstepper": True, **kwargs})
+    _exec_as_main(code, path, {TRACER_ALIAS: tracer})
+    return tracer
+
+
+def _wrap_module_in_tracer(tree: ast.Module) -> ast.Module:
+    """Return the given module with its body wrapped in a `with` block using the tracer
+    named TRACER_ALIAS. Mutates the given module.
+
+    A leading module docstring and any `from __future__` imports stay outside the `with`
+    block, as they must come first in a module. The wrapped statements keep their original
+    line numbers.
+
+    Args:
+        tree: The parsed module to wrap.
+    """
+    body = tree.body
+    num_header = _get_num_header_statements(body)
+    header, wrapped = body[:num_header], body[num_header:]
+    if not wrapped:
+        return tree
+
+    # Put the `with` statement on the line before the first wrapped statement
+    first = wrapped[0]
+    first_lineno = min(
+        [first.lineno] + [decorator.lineno for decorator in getattr(first, "decorator_list", [])]
+    )
+    with_lineno = first_lineno - 1
+
+    # The variable TRACER_ALIAS to be used in the `with` statement
+    tracer_name = ast.Name(
+        id=TRACER_ALIAS,
+        ctx=ast.Load(),
+        lineno=with_lineno,
+        col_offset=0,
+        end_lineno=with_lineno,
+        end_col_offset=0,
+    )
+    # The `with` statement that wraps the module body
+    with_node = ast.With(
+        items=[ast.withitem(context_expr=tracer_name)],
+        body=wrapped,
+        lineno=with_lineno,
+        col_offset=0,
+        end_lineno=wrapped[-1].end_lineno,
+        end_col_offset=wrapped[-1].end_col_offset,
+    )
+    tree.body = header + [with_node]
+    return tree
+
+
+def _get_num_header_statements(body: list[ast.stmt]) -> int:
+    """Return the number of header statements at the start of the given module body.
+
+    The header is a leading module docstring and any `from __future__` imports that follow
+    it, as they must come first in a module.
+
+    Args:
+        body: The statements of a parsed module.
+    """
+    num_header = 0
+    if (
+        body
+        and isinstance(body[0], ast.Expr)
+        and isinstance(body[0].value, ast.Constant)
+        and isinstance(body[0].value.value, str)
+    ):
+        num_header = 1
+    while num_header < len(body):
+        statement = body[num_header]
+        if not (isinstance(statement, ast.ImportFrom) and statement.module == "__future__"):
+            break
+        num_header += 1
+    return num_header

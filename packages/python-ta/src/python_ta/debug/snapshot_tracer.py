@@ -129,9 +129,9 @@ class SnapshotTracer:
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
-        self._start_lineno = (
-            func_frame.f_lineno + 1
-        )  # add 1 to account for the line of the with statement
+        # Add 1 to account for the line of the with statement. Keep an earlier start line if
+        # one was already set (e.g., by run_with_snapshot_tracer).
+        self._start_lineno = min(self._start_lineno, func_frame.f_lineno + 1)
         func_frame.f_trace = self._trace_func
         origin_file = func_frame.f_globals.get("__file__")
         self._origin_file = (
@@ -234,6 +234,9 @@ def run_with_snapshot_tracer(path: str, **kwargs: Any) -> SnapshotTracer:
     code = compile(tree, filename=path, mode="exec")
 
     tracer = SnapshotTracer(**{"webstepper": True, **kwargs})
+    with_node = tree.body[-1] if tree.body else None
+    if isinstance(with_node, ast.With):
+        tracer._start_lineno = with_node.lineno + 1
     _exec_as_main(code, path, {TRACER_ALIAS: tracer})
     return tracer
 

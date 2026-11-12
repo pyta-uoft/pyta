@@ -13,6 +13,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
+- Edited `Z3Parser.parse` to convert Python constants into corresponding Z3 expressions
+
 ### 🔧 Internal changes
 
 - Pinned `z3` version to 4.x

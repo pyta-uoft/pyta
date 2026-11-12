@@ -13,7 +13,7 @@ def test_z3_parser_assignment() -> None:
 
     node = extract_node(assignment)
     parser = Z3Parser()
-    assert parser.parse(node) == 5
+    assert z3.simplify(parser.parse(node)).as_long() == 5
 
 
 def _value(z3_expr: int | z3.ExprRef) -> int:

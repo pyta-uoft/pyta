@@ -536,8 +536,14 @@ def test_variable_reassignment() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.Real("x")
-    assert cfg.start.successors[0].z3_constraints == {0: [z3.Or(x == 1.0, x == 2.0, x == 3.0)]}
-    assert cfg.end.predecessors[0].z3_constraints == {0: []}
+    x1 = z3.String("x!1")
+    expected_precondition = z3.Or(1 == x, 2 == x, 3 == x)
+    assert _constraints_equivalent(
+        cfg.start.successors[0].z3_constraints[0], [expected_precondition]
+    )
+    assert _constraints_equivalent(
+        cfg.end.predecessors[0].z3_constraints[0], [expected_precondition, x1 == "x"]
+    )
 
 
 def test_variable_augumented_reassign() -> None:
@@ -553,8 +559,9 @@ def test_variable_augumented_reassign() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
+    x1 = z3.Int("x!1")
     assert cfg.start.successors[0].z3_constraints == {0: [z3.simplify(x > 10)]}
-    assert cfg.end.predecessors[0].z3_constraints == {0: []}
+    assert cfg.end.predecessors[0].z3_constraints == {0: [z3.simplify(x > 10), x1 == x - 5]}
 
 
 def test_variable_annotated_reassignment() -> None:
@@ -570,8 +577,11 @@ def test_variable_annotated_reassignment() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.String("x")
+    x1 = z3.String("x!1")
     assert cfg.start.successors[0].z3_constraints == {0: [z3.SubString(x, 0, 2) == "ab"]}
-    assert cfg.end.predecessors[0].z3_constraints == {0: []}
+    assert cfg.end.predecessors[0].z3_constraints == {
+        0: [z3.SubString(x, 0, 2) == "ab", x1 == "cd"]
+    }
 
 
 def test_variable_reassignment_in_branch() -> None:
@@ -690,18 +700,19 @@ def test_variable_reassignment_in_while_loop() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
+    x1 = z3.Int("x!1")
 
     expected_if_true_path = [
         {x == 0},
         {x < 10},
         {x < 10, x == 0},
         {x < 10, x == 0},
-        set(),
+        {x < 10, x == 0, x1 == x + 1},
     ]
     expected_if_false_path = [
         {x == 0},
         {x < 10},
-        set(),
+        {x < 10, z3.Not(x == 0), x1 == x + 1},
         {x < 10, z3.Not(x == 0)},
     ]
     expected_while_false_path = [
@@ -727,15 +738,15 @@ def test_variable_reassignment_in_while_loop() -> None:
     assert len(actual_path_second) == len(expected_if_false_path)
     assert len(actual_path_third) == len(expected_while_false_path)
     assert all(
-        set(actual) == expected
+        _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_first, expected_if_true_path)
     )
     assert all(
-        set(actual) == expected
+        _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_second, expected_if_false_path)
     )
     assert all(
-        set(actual) == expected
+        _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_third, expected_while_false_path)
     )
 
@@ -753,11 +764,12 @@ def test_variable_reassignment_in_unsatisfiable_loop_remains() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
+    x1 = z3.Int("x!1")
 
     expected_while_true_path = [
         {x == 0},
         {x == 0, x > 0},
-        set(),
+        {x == 0, x > 0, x1 == x - 1},
     ]
     expected_while_false_path = [
         {x == 0},
@@ -778,11 +790,11 @@ def test_variable_reassignment_in_unsatisfiable_loop_remains() -> None:
     assert len(actual_path_first) == len(expected_while_true_path)
     assert len(actual_path_second) == len(expected_while_false_path)
     assert all(
-        set(actual) == expected
+        _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_first, expected_while_true_path)
     )
     assert all(
-        set(actual) == expected
+        _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_second, expected_while_false_path)
     )
 
@@ -806,3 +818,10 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
 
     assert func_node is not None
     return visitor.cfgs[func_node]
+
+
+def _constraints_equivalent(actual: list[z3.ExprRef], expected: list[z3.ExprRef]) -> bool:
+    """Check if two lists of z3 constraints, actual and expected, are equivalent"""
+    solver = z3.Solver()
+    solver.add(z3.Xor(z3.And(*actual), z3.And(*expected)))
+    return solver.check() == z3.unsat

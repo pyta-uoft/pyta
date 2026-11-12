@@ -46,6 +46,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Fixed false positive `redundant-condition` reports when variables constrained before a loop are reassigned in the loop body
 - Fixed `OneIterationChecker` crashing with an `IndexError` when the `z3` option is enabled and a loop is the last statement in a function
 - Fixed `Z3Parser.parse_subscript_op` to handle negative string indexing
+- Fixed missing `redundant-condition` reports on reassigned variables by adding versioning
 
 ### 🔧 Internal changes
 

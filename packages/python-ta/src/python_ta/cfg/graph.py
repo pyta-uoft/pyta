@@ -306,8 +306,8 @@ class ControlFlowGraph:
                 if header is not None:
                     loop = header.parent
                     if self._loop_condition_sat(loop, z3_environment):
-                        for name in {n.name for n in loop.nodes_of_class(AssignName)}:
-                            z3_environment.assign(name)
+                        names = {n.name for n in loop.nodes_of_class(AssignName)}
+                        z3_environment.invalidate_constraints(names)
 
                 # traverse into target node
                 for node in edge.target.statements:
@@ -540,3 +540,26 @@ class Z3Environment:
             )
         except (Z3Exception, Z3ParseException):
             return None
+
+    def invalidate_constraints(self, names: Set[str]) -> None:
+        """Drop all current constraints that contain any version of variables in names."""
+        self.constraints = [
+            c for c in self.constraints if not ({v.split("!")[0] for v in _get_vars(c)} & names)
+        ]
+
+
+def _get_vars(expr: ExprRef) -> Set[str]:
+    """Retrieve all z3 variables from a z3 expression"""
+    from z3 import Z3_OP_UNINTERPRETED, is_const
+
+    variables: set[str] = set()
+
+    def traverse(e: ExprRef) -> None:
+        if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:
+            variables.add(e.decl().name())
+        elif hasattr(e, "children"):
+            for child in e.children():
+                traverse(child)
+
+    traverse(expr)
+    return variables

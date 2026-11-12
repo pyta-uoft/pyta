@@ -701,24 +701,23 @@ def test_variable_reassignment_in_while_loop() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
     x1 = z3.Int("x!1")
-    x2 = z3.Int("x!2")
 
     expected_if_true_path = [
         {x == 0},
-        {x == 0, x1 < 10},
-        {x == 0, x1 < 10, x1 == 0},
-        {x == 0, x1 < 10, x1 == 0},
-        {x == 0, x1 < 10, x1 == 0, x2 == x1 + 1},
+        {x < 10},
+        {x < 10, x == 0},
+        {x < 10, x == 0},
+        {x < 10, x == 0, x1 == x + 1},
     ]
     expected_if_false_path = [
         {x == 0},
-        {x == 0, x1 < 10},
-        {x == 0, x1 < 10, z3.Not(x1 == 0), x2 == x1 + 1},
-        {x == 0, x1 < 10, z3.Not(x1 == 0)},
+        {x < 10},
+        {x < 10, z3.Not(x == 0), x1 == x + 1},
+        {x < 10, z3.Not(x == 0)},
     ]
     expected_while_false_path = [
         {x == 0},
-        {x == 0, z3.Not(x1 < 10)},
+        {z3.Not(x < 10)},
     ]
 
     actual_path_first = []
@@ -821,7 +820,8 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
     return visitor.cfgs[func_node]
 
 
-def _constraints_equivalent(actual: list, expected: list) -> bool:
+def _constraints_equivalent(actual: list[z3.ExprRef], expected: list[z3.ExprRef]) -> bool:
+    """Check if two lists of z3 constraints, actual and expected, are equivalent"""
     solver = z3.Solver()
     solver.add(z3.Xor(z3.And(*actual), z3.And(*expected)))
     return solver.check() == z3.unsat

@@ -129,3 +129,51 @@ class TestDebugCLI:
             exclude_frames=["_private"],
             exclude_vars=["x", "y"],
         )
+
+    @patch("python_ta.debug.__main__.run_with_snapshot_tracer")
+    def test_trace_calls_run_with_snapshot_tracer(self, mock_run_with_snapshot_tracer, tmp_path):
+        """Test that the trace subcommand runs the given file with SnapshotTracer."""
+        path = tmp_path / "demo.py"
+        path.touch()
+
+        result = self.runner.invoke(main, ["trace", str(path)])
+
+        assert result.exit_code == 0
+        mock_run_with_snapshot_tracer.assert_called_once_with(str(path))
+
+    @patch("python_ta.debug.__main__.run_with_snapshot_tracer")
+    def test_trace_missing_file(self, mock_run_with_snapshot_tracer, tmp_path):
+        """Test that the trace subcommand exits with an error when the file does not exist."""
+        result = self.runner.invoke(main, ["trace", str(tmp_path / "missing.py")])
+
+        assert result.exit_code == 2
+        mock_run_with_snapshot_tracer.assert_not_called()
+
+    @patch("python_ta.debug.__main__.run_with_snapshot_tracer")
+    def test_trace_frame_and_var_filters(self, mock_run_with_snapshot_tracer, tmp_path):
+        """Test that comma-separated --include-frame, --exclude-frame and --exclude-var options
+        are passed to run_with_snapshot_tracer as lists."""
+        path = tmp_path / "demo.py"
+        path.touch()
+
+        result = self.runner.invoke(
+            main,
+            [
+                "trace",
+                str(path),
+                "--include-frame",
+                "func,helper",
+                "--exclude-frame",
+                "_private",
+                "--exclude-var",
+                "x, y,",
+            ],
+        )
+
+        assert result.exit_code == 0
+        mock_run_with_snapshot_tracer.assert_called_once_with(
+            str(path),
+            include_frames=["func", "helper"],
+            exclude_frames=["_private"],
+            exclude_vars=["x", "y"],
+        )

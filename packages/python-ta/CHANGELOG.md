@@ -21,6 +21,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added documentation for some of the enabled but previously missing Pylint messages.
 - Added a `python_ta.debug` CLI with a `snapshot` subcommand (`python -m python_ta.debug snapshot FILE`) that runs a file with snapshot comments enabled.
 - Extended `python_ta.debug.run_with_snapshots` to take in `**kwargs`, allowing the user to set default parameters for snapshot comments. Also made `save=True` the default and allowed `# pyta: snapshot` to be accepted.
+- Added `python_ta.debug.run_with_snapshot_tracer` and a `trace` subcommand for the `python_ta.debug` CLI (`python -m python_ta.debug trace FILE`), which both trace the file with `SnapshotTracer`.
 
 ### 💫 New checkers
 

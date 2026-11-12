@@ -11,7 +11,7 @@ from unittest.mock import patch
 import pytest
 from pytest_snapshot.plugin import Snapshot
 
-from python_ta.debug import SnapshotTracer
+from python_ta.debug import SnapshotTracer, run_with_snapshot_tracer
 
 SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_tracer_testing_snapshots"
@@ -429,3 +429,113 @@ class TestSnapshotTracer:
         with patch("python_ta.debug.snapshot_tracer.open_html_in_browser") as mock_open:
             func_webstepper_options()
             mock_open.assert_called_once()
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
+class TestRunWithSnapshotTracer:
+    """
+    Tests for run_with_snapshot_tracer. These tests are skipped if the Python version is less
+    than 3.10.
+    """
+
+    def test_header_stays_outside_with_block(self, tmp_path):
+        """
+        Test that run_with_snapshot_tracer runs a file with a module docstring and several
+        `from __future__` imports, which must come first in a module, and starts the code shown
+        in the Webstepper after them.
+        """
+        path = tmp_path / "demo.py"
+        path.write_text(
+            '"""Docstring."""\n'
+            "from __future__ import annotations\n"
+            "from __future__ import division\n"
+            "x = 1\n",
+            encoding="utf-8",
+        )
+
+        tracer = run_with_snapshot_tracer(str(path), webstepper=False)
+
+        assert tracer._get_code() == ("x = 1", 4)
+
+    @pytest.mark.parametrize(
+        "source, expected_code",
+        [
+            ("x = 1\ny = 2\n", ("x = 1\ny = 2", 1)),
+            ('"""Multi-line\ndocstring."""\nx = 1\n', ("x = 1", 3)),
+            (
+                '"""Docstring."""\n\n@staticmethod\n@staticmethod\ndef f():\n    pass\nx = 1\n',
+                ("@staticmethod\n@staticmethod\ndef f():\n    pass\nx = 1", 3),
+            ),
+        ],
+    )
+    def test_webstepper_code_starts_at_first_statement(self, tmp_path, source, expected_code):
+        """
+        Test that the code shown in the Webstepper starts at the first statement after the
+        module header, including any decorators on that statement.
+        """
+        path = tmp_path / "demo.py"
+        path.write_text(source, encoding="utf-8")
+
+        tracer = run_with_snapshot_tracer(str(path), webstepper=False)
+
+        assert tracer._get_code() == expected_code
+
+    def test_error_points_to_original_line(self, tmp_path):
+        """
+        Test that an error raised by the traced file is reported at the file's original path
+        and line.
+        """
+        path = tmp_path / "demo.py"
+        path.write_text('"""Docstring."""\nx = 1\nraise ValueError("error")\n', encoding="utf-8")
+
+        with pytest.raises(ValueError) as exc_info:
+            run_with_snapshot_tracer(str(path), webstepper=False)
+
+        last_frame = exc_info.tb
+        while last_frame.tb_next is not None:
+            last_frame = last_frame.tb_next
+
+        assert last_frame.tb_frame.f_code.co_filename == str(path)
+        assert last_frame.tb_lineno == 3
+
+    def test_runs_as_main(self, tmp_path):
+        """
+        Test that run_with_snapshot_tracer runs the file as the "__main__" module, so code in an
+        `if __name__ == "__main__"` block is run and traced.
+        """
+        path = tmp_path / "demo.py"
+        path.write_text('if __name__ == "__main__":\n    x = 1\n', encoding="utf-8")
+
+        tracer = run_with_snapshot_tracer(str(path), webstepper=False)
+
+        assert 2 in [snapshot_entry["lineNumber"] for snapshot_entry in tracer.snapshots]
+
+    def test_webstepper_true_by_default(self, tmp_path):
+        """
+        Test that run_with_snapshot_tracer creates a SnapshotTracer that opens the Webstepper
+        by default.
+        """
+        path = tmp_path / "demo.py"
+        path.write_text("x = 1\n", encoding="utf-8")
+
+        with patch("python_ta.debug.snapshot_tracer.SnapshotTracer") as mock_tracer:
+            run_with_snapshot_tracer(str(path))
+
+        mock_tracer.assert_called_once_with(webstepper=True)
+
+    def test_kwargs_passed_to_snapshot_tracer(self, tmp_path):
+        """
+        Test that keyword arguments given to run_with_snapshot_tracer are passed to
+        SnapshotTracer, including webstepper=False overriding the default.
+        """
+        path = tmp_path / "demo.py"
+        path.write_text("x = 1\n", encoding="utf-8")
+
+        with patch("python_ta.debug.snapshot_tracer.SnapshotTracer") as mock_tracer:
+            run_with_snapshot_tracer(
+                str(path), webstepper=False, include_frames=["f"], exclude_vars=["x"]
+            )
+
+        mock_tracer.assert_called_once_with(
+            webstepper=False, include_frames=["f"], exclude_vars=["x"]
+        )

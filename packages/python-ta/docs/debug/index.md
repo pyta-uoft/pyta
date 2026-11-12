@@ -492,12 +492,42 @@ if __name__ == '__main__':
 
 When this function runs, MemoryViz snapshots are captured and stored internally in the `SnapshotTracer`. These snapshots can be accessed via the `snapshots` property. If `webstepper=True`, the snapshots are rendered into an HTML visualization. The context manager will step into Python functions defined in the same module as the traced context; calls into external modules and built-ins are not traced. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
 
+### Tracing a whole file
+
+Instead of adding a `with SnapshotTracer(...)` block yourself, you can trace every line of a file with `python_ta.debug.run_with_snapshot_tracer`. It runs the file as if all of its code were inside a `with SnapshotTracer(...)` block. It opens the Webstepper by default, so you can step through the memory diagram at each line:
+
+```python
+# demo.py
+squares = []
+for n in range(1, 4):
+    squares.append(n * n)
+```
+
+```python
+# run_demo.py
+from python_ta.debug import run_with_snapshot_tracer
+
+run_with_snapshot_tracer("demo.py")
+```
+
+You can also run the file from the command line:
+
+```console
+$ python -m python_ta.debug trace demo.py
+```
+
+The `--include-frame`, `--exclude-frame` and `--exclude-var` options take comma-separated lists, and are passed to `SnapshotTracer`.
+
 ### API
 
 ```{eval-rst}
 .. automethod:: python_ta.debug.SnapshotTracer.__init__
 
 .. autoattribute:: python_ta.debug.SnapshotTracer.snapshots
+```
+
+```{eval-rst}
+.. autofunction:: python_ta.debug.snapshot_tracer.run_with_snapshot_tracer
 ```
 
 ### Current Limitations

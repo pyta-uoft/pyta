@@ -4,6 +4,7 @@ from typing import Any, Optional
 import click
 
 from .snapshot import run_with_snapshots
+from .snapshot_tracer import run_with_snapshot_tracer
 
 
 def _split_comma_list(
@@ -80,6 +81,48 @@ def snapshot(
         kwargs["exclude_vars"] = exclude_vars
 
     run_with_snapshots(file, **kwargs)
+
+
+@main.command()
+@click.argument("file", type=click.Path(exists=True, dir_okay=False))
+@click.option(
+    "--include-frame",
+    "include_frames",
+    callback=_split_comma_list,
+    help="Only capture variables from the given functions, as a comma-separated list "
+    "(e.g. func1,func2).",
+)
+@click.option(
+    "--exclude-frame",
+    "exclude_frames",
+    callback=_split_comma_list,
+    help="Do not capture variables from the given functions, as a comma-separated list "
+    "(e.g. func1,func2).",
+)
+@click.option(
+    "--exclude-var",
+    "exclude_vars",
+    callback=_split_comma_list,
+    help="Do not capture the given variables, as a comma-separated list (e.g. x,y).",
+)
+def trace(
+    file: str,
+    include_frames: Optional[list[str]],
+    exclude_frames: Optional[list[str]],
+    exclude_vars: Optional[list[str]],
+) -> None:
+    """Run FILE with all of its code traced by a SnapshotTracer, then open the Webstepper
+    to step through the memory diagram at each line.
+    """
+    kwargs: dict[str, Any] = {}
+    if include_frames:
+        kwargs["include_frames"] = include_frames
+    if exclude_frames:
+        kwargs["exclude_frames"] = exclude_frames
+    if exclude_vars:
+        kwargs["exclude_vars"] = exclude_vars
+
+    run_with_snapshot_tracer(file, **kwargs)
 
 
 if __name__ == "__main__":

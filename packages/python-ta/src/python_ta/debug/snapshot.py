@@ -12,7 +12,6 @@ import functools
 import inspect
 import json
 import logging
-import os
 import re
 import shutil
 import subprocess
@@ -25,9 +24,10 @@ from asttokens.util import Token, replace
 from packaging.version import Version, parse
 
 from .id_tracker import IDTracker
+from .util import exec_as_main
 
 if TYPE_CHECKING:
-    from types import CodeType, FrameType
+    from types import FrameType
 
 SNAPSHOT_NAME = "snapshot"
 
@@ -350,25 +350,7 @@ def run_with_snapshots(path: str, **kwargs: Any) -> None:
     code = compile(transform_snapshot_comments(path), filename=path, mode="exec")
 
     snapshot_func = functools.partial(snapshot, **{"save": True, **kwargs})
-    _exec_as_main(code, path, {SNAPSHOT_ALIAS: snapshot_func})
-
-
-def _exec_as_main(code: CodeType, path: str, extra_globals: dict[str, Any]) -> None:
-    """Run the given code as the "__main__" module of the Python file at path, as running
-    the file directly with Python would.
-
-    Args:
-        code: The compiled code of the file.
-        path: The path to the Python file the code was compiled from.
-        extra_globals: Additional global variables to define before running the code.
-    """
-    # Add the file's directory to the import path, as running it directly would
-    old_path = sys.path[:]
-    sys.path.insert(0, os.path.dirname(os.path.abspath(path)))
-    try:
-        exec(code, {"__name__": "__main__", "__file__": path, **extra_globals})
-    finally:
-        sys.path[:] = old_path
+    exec_as_main(code, path, {SNAPSHOT_ALIAS: snapshot_func})
 
 
 def transform_snapshot_comments(path: str) -> str:

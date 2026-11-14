@@ -17,7 +17,8 @@ from jinja2 import Environment, FileSystemLoader
 
 from ..util.servers.one_shot_server import open_html_in_browser
 from .id_tracker import IDTracker
-from .snapshot import _exec_as_main, snapshot, snapshot_to_json
+from .snapshot import snapshot, snapshot_to_json
+from .util import exec_as_main
 
 if TYPE_CHECKING:
     import types
@@ -237,7 +238,7 @@ def run_with_snapshot_tracer(path: str, **kwargs: Any) -> SnapshotTracer:
     with_node = tree.body[-1] if tree.body else None
     if isinstance(with_node, ast.With):
         tracer._start_lineno = with_node.lineno + 1
-    _exec_as_main(code, path, {TRACER_ALIAS: tracer})
+    exec_as_main(code, path, {TRACER_ALIAS: tracer})
     return tracer
 
 

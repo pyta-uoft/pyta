@@ -231,24 +231,27 @@ def run_with_snapshot_tracer(path: str, **kwargs: Any) -> SnapshotTracer:
     with tokenize.open(path) as f:
         source = f.read()
 
-    tree = _wrap_module_in_tracer(ast.parse(source, filename=path))
+    tree = ast.parse(source, filename=path)
+    with_node = _wrap_module_in_tracer(tree)
     code = compile(tree, filename=path, mode="exec")
 
     tracer = SnapshotTracer(**{"webstepper": True, **kwargs})
-    with_node = tree.body[-1] if tree.body else None
-    if isinstance(with_node, ast.With):
+    if with_node is not None:
         tracer._start_lineno = with_node.lineno + 1
+
     exec_as_main(code, path, {TRACER_ALIAS: tracer})
     return tracer
 
 
-def _wrap_module_in_tracer(tree: ast.Module) -> ast.Module:
-    """Return the given module with its body wrapped in a `with` block using the tracer
-    named TRACER_ALIAS. Mutates the given module.
+def _wrap_module_in_tracer(tree: ast.Module) -> Optional[ast.With]:
+    """Wrap the body of the given module in a `with` block using the tracer named
+    TRACER_ALIAS, and return the new `with` node. Mutates the given module.
 
     A leading module docstring and any `from __future__` imports stay outside the `with`
     block, as they must come first in a module. The wrapped statements keep their original
     line numbers.
+
+    Return None (and leave the module unchanged) if there are no statements to wrap.
 
     Args:
         tree: The parsed module to wrap.
@@ -257,7 +260,7 @@ def _wrap_module_in_tracer(tree: ast.Module) -> ast.Module:
     num_header = _get_num_header_statements(body)
     header, wrapped = body[:num_header], body[num_header:]
     if not wrapped:
-        return tree
+        return None
 
     # Put the `with` statement on the line before the first wrapped statement
     first = wrapped[0]
@@ -285,7 +288,7 @@ def _wrap_module_in_tracer(tree: ast.Module) -> ast.Module:
         end_col_offset=wrapped[-1].end_col_offset,
     )
     tree.body = header + [with_node]
-    return tree
+    return with_node
 
 
 def _get_num_header_statements(body: list[ast.stmt]) -> int:

@@ -294,23 +294,24 @@ def _wrap_module_in_tracer(tree: ast.Module) -> Optional[ast.With]:
 def _get_num_header_statements(body: list[ast.stmt]) -> int:
     """Return the number of header statements at the start of the given module body.
 
-    The header is a leading module docstring and any `from __future__` imports that follow
-    it, as they must come first in a module.
+    The header is the leading run of string literal expressions (e.g. the module
+    docstring) and `from __future__` imports, since they must come before any other code
+    in a module.
 
     Args:
         body: The statements of a parsed module.
     """
     num_header = 0
-    if (
-        body
-        and isinstance(body[0], ast.Expr)
-        and isinstance(body[0].value, ast.Constant)
-        and isinstance(body[0].value.value, str)
-    ):
-        num_header = 1
-    while num_header < len(body):
-        statement = body[num_header]
-        if not (isinstance(statement, ast.ImportFrom) and statement.module == "__future__"):
+    for statement in body:
+        is_string = (
+            isinstance(statement, ast.Expr)
+            and isinstance(statement.value, ast.Constant)
+            and isinstance(statement.value.value, str)
+        )
+        is_future_import = (
+            isinstance(statement, ast.ImportFrom) and statement.module == "__future__"
+        )
+        if not (is_string or is_future_import):
             break
         num_header += 1
     return num_header

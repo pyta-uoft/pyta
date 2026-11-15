@@ -516,7 +516,7 @@ You can also run the file from the command line:
 $ python -m python_ta.debug trace demo.py
 ```
 
-The `--include-frame`, `--exclude-frame` and `--exclude-var` options take comma-separated lists, and are passed to `SnapshotTracer`.
+The `--include-frames`, `--exclude-frames` and `--exclude-vars` options take comma-separated lists, and are passed to `SnapshotTracer`.
 
 ### API
 

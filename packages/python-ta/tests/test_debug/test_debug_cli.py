@@ -151,7 +151,7 @@ class TestDebugCLI:
 
     @patch("python_ta.debug.__main__.run_with_snapshot_tracer")
     def test_trace_frame_and_var_filters(self, mock_run_with_snapshot_tracer, tmp_path):
-        """Test that comma-separated --include-frame, --exclude-frame and --exclude-var options
+        """Test that comma-separated --include-frames, --exclude-frames and --exclude-vars options
         are passed to run_with_snapshot_tracer as lists."""
         path = tmp_path / "demo.py"
         path.touch()
@@ -161,11 +161,11 @@ class TestDebugCLI:
             [
                 "trace",
                 str(path),
-                "--include-frame",
+                "--include-frames",
                 "func,helper",
-                "--exclude-frame",
+                "--exclude-frames",
                 "_private",
-                "--exclude-var",
+                "--exclude-vars",
                 "x, y,",
             ],
         )

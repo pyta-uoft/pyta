@@ -8,7 +8,6 @@ import logging
 import os
 import socket
 import sys
-import tokenize
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Optional
@@ -228,7 +227,8 @@ def run_with_snapshot_tracer(path: str, **kwargs: Any) -> SnapshotTracer:
     Returns:
         The SnapshotTracer used to trace the file, which holds the snapshots taken.
     """
-    with tokenize.open(path) as f:
+    # utf-8-sig strips the BOM at the start of the file, which ast.parse would reject
+    with open(path, encoding="utf-8-sig") as f:
         source = f.read()
 
     tree = ast.parse(source, filename=path)

@@ -83,7 +83,8 @@ class Z3Parser:
         if isinstance(typ, z3.ExprRef):  # the value is already a z3 variable
             x = typ
         elif typ in type_to_z3:  # convert string value to z3 variable
-            x = type_to_z3[typ](name)
+            # suffix !0 is used to indicate the initial version of the variable
+            x = type_to_z3[typ](f"{name}!0")
         else:
             raise Z3ParseException(f"Unhandled type {typ}.")
 

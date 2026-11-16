@@ -408,10 +408,10 @@ def test_cfg_z3_vars_initialization():
     cfg.add_arguments(node.args)
 
     assert len(cfg.z3_vars) == 4
-    assert cfg.z3_vars["x"] == z3.Int("x")
-    assert cfg.z3_vars["y"] == z3.Real("y")
-    assert cfg.z3_vars["z"] == z3.Bool("z")
-    assert cfg.z3_vars["a"] == z3.String("a")
+    assert cfg.z3_vars["x"] == z3.Int("x!0")
+    assert cfg.z3_vars["y"] == z3.Real("y!0")
+    assert cfg.z3_vars["z"] == z3.Bool("z!0")
+    assert cfg.z3_vars["a"] == z3.String("a!0")
 
 
 @patch.dict("sys.modules", {"python_ta_z3": None})

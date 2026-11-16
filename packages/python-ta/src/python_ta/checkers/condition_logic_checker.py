@@ -76,22 +76,43 @@ class ConditionLogicChecker(BaseChecker):
         except ImportError:
             return
 
-        node_block = node.cfg_block
-
-        # create node condition z3 constraint
-        condition_node = node.test
-        env = Z3Environment(node.frame().cfg.z3_vars, [])
-        z3_condition = env.parse_constraint(condition_node)
-
-        if z3_condition is None:
-            return
-
+        # Get all feasible predecessors of the node
         predecessors = [edge for edge in node.cfg_block.predecessors if edge.is_feasible]
 
-        if self._all_paths_unsat(node, predecessors, negate_condition=True):
-            self.add_message("redundant-condition", node=node.test)
+        redundant_paths = []  # (edge, path_id) pairs where the condition is always True
+        impossible_paths = []  # (edge, path_id) pairs where the condition is always False
+        total_paths = 0  # Total number of feasible paths to the node
 
-        if self._all_paths_unsat(node, predecessors, negate_condition=False):
+        for edge in predecessors:
+            for path_id, constraints in edge.z3_constraints.items():
+                env = Z3Environment(edge.z3_vars[path_id], [])
+                cond = env.parse_constraint(node.test)
+
+                # If the condition cannot be parsed, report nothing
+                if cond is None:
+                    return
+
+                total_paths += 1
+                path_constraints = z3.And(*constraints) if constraints else z3.BoolVal(True)
+
+                if self._check_unsat(path_constraints, z3.Not(cond)):
+                    redundant_paths.append((edge, path_id))
+                if self._check_unsat(path_constraints, cond):
+                    impossible_paths.append((edge, path_id))
+
+                # If neither list can reach the total number of paths, the condition is neither redundant nor impossible
+                if len(redundant_paths) < total_paths and len(impossible_paths) < total_paths:
+                    return
+
+        # If there are no feasible paths to check, we cannot determine redundancy or impossibility
+        if total_paths == 0:
+            return
+
+        if len(redundant_paths) == total_paths:
+            # All feasible paths lead to the condition being True
+            self.add_message("redundant-condition", node=node.test)
+        if len(impossible_paths) == total_paths:
+            # All feasible paths lead to the condition being False
             self.add_message("impossible-condition", node=node.test)
 
     def _check_unsat(self, prev_constraints: ExprRef, node_constraint: ExprRef) -> bool:
@@ -106,29 +127,6 @@ class ConditionLogicChecker(BaseChecker):
         solver = z3.Solver()
         solver.add(z3.And(prev_constraints, node_constraint))
         return solver.check() == z3.unsat
-
-    def _all_paths_unsat(
-        self,
-        node: Union[nodes.If, nodes.While],
-        predecessors: list,
-        negate_condition: bool,
-    ) -> bool:
-        """Check if all feasible paths leading to the node result in unsatisfiable constraints"""
-        import z3
-
-        from ..cfg.graph import Z3Environment
-
-        for edge in predecessors:
-            for path_id, constraints in edge.z3_constraints.items():
-                env = Z3Environment(edge.z3_vars[path_id], [])
-                cond = env.parse_constraint(node.test)
-                if cond is None:
-                    return False
-                if negate_condition:
-                    cond = z3.Not(cond)
-                if not self._check_unsat(z3.And(*constraints), cond):
-                    return False
-        return True
 
 
 def register(linter: PyLinter) -> None:

@@ -135,6 +135,86 @@ correct_set = {'value 1', 2, 3}
 
 Sets are unordered and duplicate elements are not allowed.
 
+(W0122)=
+
+### Exec used (W0122)
+
+This error occurs when the built-in `exec` function is used to run Python code stored in a string.
+Running dynamically constructed code can execute unintended commands and makes a program difficult
+to understand and debug. Use regular Python statements or call a specific function instead.
+
+```{literalinclude} /../../../examples/pylint/w0122_exec_used.py
+
+```
+
+Corrected version:
+
+```python
+print('Hello!')
+```
+
+(W0123)=
+
+### Eval used (W0123)
+
+This error occurs when the built-in `eval` function is used to evaluate Python code stored in a
+string. Evaluating untrusted input can execute unintended code. Parse the expected data format or
+choose an operation explicitly instead.
+
+```{literalinclude} /../../../examples/pylint/w0123_eval_used.py
+
+```
+
+Corrected version:
+
+```python
+def parse_integer(value: str) -> int:
+    """Return the integer represented by value."""
+    return int(value)
+```
+
+(W0124)=
+
+### Confusing with statement (W0124)
+
+This error occurs when an item in a `with` statement is a bare name rather than a context manager.
+This can look like two context managers separated by a comma even though only the first expression
+is opened. Call or otherwise construct each intended context manager explicitly.
+
+```{literalinclude} /../../../examples/pylint/w0124_confusing_with_statement.py
+
+```
+
+Corrected version:
+
+```python
+with open("file.txt") as fh1:
+    with open("file.txt") as fh2:
+        pass
+```
+
+(W0126)=
+
+### Missing parentheses for call in test (W0126)
+
+This error occurs when a function is used as a condition without being called. Add parentheses to call
+the function.
+
+```{literalinclude} /../../../examples/pylint/w0126_missing_parentheses_for_call_in_test.py
+
+```
+
+Corrected version:
+
+```python
+def condition() -> bool:
+    return True
+
+
+if condition():
+    pass
+```
+
 (E1123)=
 
 ### Unexpected keyword arg (E1123)
@@ -759,6 +839,25 @@ if a < b < c:
     pass
 ```
 
+(R1721)=
+
+### Unnecessary comprehension (R1721)
+
+This error occurs when a comprehension copies every item from an iterable without transforming or
+filtering the items. We can instead make the copy directly by using the appropriate list, dict, or set constructor.
+
+```{literalinclude} /../../../examples/pylint/r1721_unnecessary_comprehension.py
+
+```
+
+Corrected version:
+
+```python
+tuple_x = (1, 2, 3)
+
+listed_x = list(tuple_x)
+```
+
 (R1726)=
 
 ### Simplifiable condition (R1726)
@@ -1124,6 +1223,48 @@ for index, colour in enumerate(colours):
     print(colour)
 ```
 
+(R1737)=
+
+### Use yield from (R1737)
+
+This error occurs when a generator loops over an iterable only to yield each item unchanged. Use
+`yield from` instead, making the generator shorter and allowing the
+caller to communicate directly with the generator.
+
+```{literalinclude} /../../../examples/pylint/r1737_use_yield_from.py
+
+```
+
+Corrected version:
+
+```python
+from collections.abc import Iterable, Iterator
+
+
+def yield_items(items: Iterable[int]) -> Iterator[int]:
+    """Yield the values in items."""
+    yield from items
+```
+
+(R1738)=
+
+### Chained comparison all equal (R1738)
+
+This error occurs when comparisons joined by `and` form a cycle of `<=` or `>=` comparisons. These
+conditions are equivalent to checking that all the operands are equal.
+
+```{literalinclude} /../../../examples/pylint/r1738_chained_comparison_all_equal.py
+
+```
+
+Corrected version:
+
+```python
+def have_equal_scores(first: int, second: int) -> bool:
+    """Return whether first and second are equal."""
+    return first == second
+```
+
 (W0107)=
 
 ### Unnecessary pass (W0107)
@@ -1142,6 +1283,28 @@ if `pass` is removed.
 **See also:**
 
 - [StackOverflow: How To Use The Pass Statement In Python]
+
+(W0108)=
+
+### Unnecessary lambda (W0108)
+
+This error occurs when a lambda only calls another function with the same arguments. Pass or call
+the original function directly instead of wrapping it in a lambda.
+
+```{literalinclude} /../../../examples/pylint/w0108_unnecessary_lambda.py
+
+```
+
+Corrected version:
+
+```python
+def add_one(num: int) -> int:
+    """Return num increased by one."""
+    return num + 1
+
+
+add_one(1)
+```
 
 (W2301)=
 
@@ -3276,6 +3439,8 @@ python_ta.check_all(config={
 })
 ```
 
+(R9901)=
+
 ### Impossible Condition (R9901)
 
 This error occurs when an `if` or `while` condition is guaranteed to be false.
@@ -3284,6 +3449,36 @@ Example:
 
 ```{literalinclude} /../../../examples/custom_checkers/r9901_impossible_condition.py
 
+```
+
+Corrected version:
+
+```python
+def print_non_negative_number(x: int) -> None:
+    """Print the non-negative number x.
+
+    Preconditions:
+        - x >= 0
+    """
+    print(x)
+
+
+def print_if_true(value: bool) -> None:
+    """Print a message when value is true."""
+    if value:
+        print("value is true")
+
+
+def display_number(x: int) -> str:
+    """Return the word for x, or 'other' when x is outside the range 0 to 2."""
+    if x == 0:
+        return "zero"
+    elif x == 1:
+        return "one"
+    elif x == 2:
+        return "two"
+    else:
+        return "other"
 ```
 
 This error will only be checked if the `z3-solver` library is installed and `z3` option of PythonTA
@@ -4308,6 +4503,27 @@ Corrected version:
 ```ini
 [MESSAGES CONTROL]
 disable =
+```
+
+(W0012)=
+
+### Unknown option value (W0012)
+
+This error occurs when a Pylint configuration option names a message that Pylint does not
+recognize. Check the spelling of the message name or code.
+
+For example, `missnig-docstring` is a misspelling of `missing-docstring`:
+
+```ini
+[MESSAGES CONTROL]
+disable = missnig-docstring
+```
+
+Corrected version:
+
+```ini
+[MESSAGES CONTROL]
+disable = missing-docstring
 ```
 
 (E0011)=

@@ -1,2 +1,2 @@
-def dynamic_execution(code_block: str) -> None:
-    exec(code_block)  # Error on this line
+code = "print('Hello!')"
+exec(code)  # Error on this line

@@ -1,5 +1,3 @@
-from typing import Any
-
-
-def dynamic_evaluation(expression: str) -> Any:
-    eval(expression)  # Error on this line
+def parse_integer(value: str) -> int:
+    """Return the integer represented by value."""
+    return eval(value)  # Error on this line

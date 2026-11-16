@@ -1,5 +1,5 @@
 def add_one(num: int) -> int:
-    """Calculate the sum of the elements in the given list."""
+    """Return num increased by one."""
     return num + 1
 
 

@@ -67,6 +67,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Added a separate fixture and test for examples requiring inline Pylint comments (E0011)
 - Disabled E0014 and E1003, which relate to older Pylint and Python versions, respectively.
 - Standardized correction examples in the checker documentation.
+- Fixed `test_user_config_file_no_default` and `test_user_config_toml_file_no_default` failing with pylint 4.1.4 by reading an empty config file in the expected linter.
 
 ## [2.13.1] - 2026-08-12
 

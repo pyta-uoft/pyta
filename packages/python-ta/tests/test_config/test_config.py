@@ -54,6 +54,20 @@ def configure_linter_no_default():
     yield linter
 
 
+@pytest.fixture
+def configure_linter_no_default_from_file():
+    """Like configure_linter_no_default, but reads an empty config file first, so pylint
+    handles it the same way as a linter that reads test.pylintrc or test.toml."""
+    curr_dir = os.path.dirname(__file__)
+    empty_config = os.path.join(curr_dir, "file_fixtures", "empty.pylintrc")
+    linter = reset_linter(config=empty_config, load_default_config=False)
+
+    for key in TEST_CONFIG:
+        linter.set_option(key, TEST_CONFIG[key])
+
+    yield linter
+
+
 def test_user_config_dict(configure_linter_load_default) -> None:
     """Test that reset_linter correctly overrides the default options when the user provides a
     config of type dict."""
@@ -96,27 +110,27 @@ def test_user_config_dict_no_default(configure_linter_no_default) -> None:
     assert actual == expected
 
 
-def test_user_config_file_no_default(configure_linter_no_default) -> None:
+def test_user_config_file_no_default(configure_linter_no_default_from_file) -> None:
     """Test that reset_linter correctly overrides the default options when the user provides a
     config file of type str (so it is a file).
 
     The default options are not loaded from the PythonTA default config."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test.pylintrc")
-    expected = configure_linter_no_default.config.__dict__
+    expected = configure_linter_no_default_from_file.config.__dict__
     actual = reset_linter(config=config, load_default_config=False).config.__dict__
 
     assert actual == expected
 
 
-def test_user_config_toml_file_no_default(configure_linter_no_default) -> None:
+def test_user_config_toml_file_no_default(configure_linter_no_default_from_file) -> None:
     """Test that reset_linter correctly overrides the default options when the user provides a
     config file of type str that is a TOML file.
 
     The default options are not loaded from the PythonTA default config."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test.toml")
-    expected = configure_linter_no_default.config.__dict__
+    expected = configure_linter_no_default_from_file.config.__dict__
     actual = reset_linter(config=config, load_default_config=False).config.__dict__
 
     assert actual == expected

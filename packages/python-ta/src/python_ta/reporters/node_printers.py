@@ -779,14 +779,14 @@ def render_static_type_checker_errors(
     if start_line == end_line:
         yield (
             start_line,
-            slice(start_col - 1, end_col),
+            slice(start_col, end_col),
             LineType.ERROR,
             source_lines[start_line - 1],
         )
     else:
         yield (
             start_line,
-            slice(start_col - 1, None),
+            slice(start_col, None),
             LineType.ERROR,
             source_lines[start_line - 1],
         )

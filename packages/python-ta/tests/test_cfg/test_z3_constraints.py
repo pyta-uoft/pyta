@@ -17,9 +17,9 @@ def test_simple_function() -> None:
         print(x + y)
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
-    y = z3.Int("y")
-    expected = {0: [z3.simplify(z3.And(x > 0, y > 0)), z3.simplify(x >= y)]}
+    x0 = z3.Int("x!0")
+    y0 = z3.Int("y!0")
+    expected = {0: [z3.simplify(z3.And(x0 > 0, y0 > 0)), z3.simplify(x0 >= y0)]}
     assert all(edge.z3_constraints == expected for edge in cfg.get_edges())
 
 
@@ -36,18 +36,18 @@ def test_if_statement() -> None:
         print("after if")
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
-    y = z3.Bool("y")
+    x0 = z3.Int("x!0")
+    y0 = z3.Bool("y!0")
     expected_if_path = [
-        {x > 0},
-        {x > 0, z3.And(x > 5, y)},
-        {x > 0, z3.And(x > 5, y)},
-        {x > 0, z3.And(x > 5, y)},
+        {x0 > 0},
+        {x0 > 0, z3.And(x0 > 5, y0)},
+        {x0 > 0, z3.And(x0 > 5, y0)},
+        {x0 > 0, z3.And(x0 > 5, y0)},
     ]
     expected_other_path = [
-        {x > 0},
-        {x > 0, z3.Not(z3.And(x > 5, y))},
-        {x > 0, z3.Not(z3.And(x > 5, y))},
+        {x0 > 0},
+        {x0 > 0, z3.Not(z3.And(x0 > 5, y0))},
+        {x0 > 0, z3.Not(z3.And(x0 > 5, y0))},
     ]
 
     actual_path_first = []
@@ -88,27 +88,27 @@ def test_if_else() -> None:
         print("end")
     """
     cfg = _create_cfg(src, "func")
-    x = z3.String("x")
-    y = z3.Int("y")
+    x0 = z3.String("x!0")
+    y0 = z3.Int("y!0")
     expected_if_path = [
-        {z3.SubString(x, 0, 1) == "a", y > 5},
-        {z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"},
-        {z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"},
-        {z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, x0 == "abc"},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, x0 == "abc"},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, x0 == "abc"},
     ]
     expected_elif_path = [
-        {z3.SubString(x, 0, 1) == "a", y > 5},
-        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc")},
-        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10},
-        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10},
-        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, z3.Not(x0 == "abc")},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, z3.Not(x0 == "abc"), y0 > 10},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, z3.Not(x0 == "abc"), y0 > 10},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, z3.Not(x0 == "abc"), y0 > 10},
     ]
     expected_else_path = [
-        {z3.SubString(x, 0, 1) == "a", y > 5},
-        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc")},
-        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)},
-        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)},
-        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, z3.Not(x0 == "abc")},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, z3.Not(x0 == "abc"), z3.Not(y0 > 10)},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, z3.Not(x0 == "abc"), z3.Not(y0 > 10)},
+        {z3.SubString(x0, 0, 1) == "a", y0 > 5, z3.Not(x0 == "abc"), z3.Not(y0 > 10)},
     ]
 
     actual_path_first = []
@@ -153,17 +153,17 @@ def test_while_loop() -> None:
         print(x + y)
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
-    y = z3.Int("y")
+    x0 = z3.Int("x!0")
+    y0 = z3.Int("y!0")
     expected_while_true_path = [
-        {x > 5, y > 10},
-        {x > 5, y > 10, x + y > 15},
+        {x0 > 5, y0 > 10},
+        {x0 > 5, y0 > 10, x0 + y0 > 15},
         set(),
     ]
     expected_while_false_path = [
-        {x > 5, y > 10},
-        {x > 5, y > 10, z3.Not(x + y > 15)},
-        {x > 5, y > 10, z3.Not(x + y > 15)},
+        {x0 > 5, y0 > 10},
+        {x0 > 5, y0 > 10, z3.Not(x0 + y0 > 15)},
+        {x0 > 5, y0 > 10, z3.Not(x0 + y0 > 15)},
     ]
 
     actual_path_first = []
@@ -201,17 +201,17 @@ def test_while_loop_infinite() -> None:
         print(x + y)
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
-    y = z3.Int("y")
+    x0 = z3.Int("x!0")
+    y0 = z3.Int("y!0")
     expected_while_true_path = [
-        {x > 5, y > 10},
-        {x > 5, y > 10, x + y > 15},
-        {x > 5, y > 10, x + y > 15},
+        {x0 > 5, y0 > 10},
+        {x0 > 5, y0 > 10, x0 + y0 > 15},
+        {x0 > 5, y0 > 10, x0 + y0 > 15},
     ]
     expected_while_false_path = [
-        {x > 5, y > 10},
-        {x > 5, y > 10, z3.Not(x + y > 15)},
-        {x > 5, y > 10, z3.Not(x + y > 15)},
+        {x0 > 5, y0 > 10},
+        {x0 > 5, y0 > 10, z3.Not(x0 + y0 > 15)},
+        {x0 > 5, y0 > 10, z3.Not(x0 + y0 > 15)},
     ]
 
     actual_path_first = []
@@ -249,10 +249,10 @@ def test_for_loop() -> None:
         print("end")
     """
     cfg = _create_cfg(src, "func")
-    x = z3.String("x")
-    y = z3.Int("y")
+    x0 = z3.String("x!0")
+    y0 = z3.Int("y!0")
     assert all(
-        set(constraints) == {z3.simplify(z3.SubString(x, 0, 1) == "a"), z3.simplify(y > 0)}
+        set(constraints) == {z3.simplify(z3.SubString(x0, 0, 1) == "a"), z3.simplify(y0 > 0)}
         for edge in cfg.get_edges()
         for constraints in edge.z3_constraints.values()
     )
@@ -273,25 +273,25 @@ def test_nested_if() -> None:
         print("end")
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Real("x")
-    y = z3.Real("y")
+    x0 = z3.Real("x!0")
+    y0 = z3.Real("y!0")
     expected_inner_if_path = [
-        {x > 0, y < 0},
-        {x > 0, y < 0, x > 10},
-        {x > 0, y < 0, x > 10, y < -10},
-        {x > 0, y < 0, x > 10, y < -10},
-        {x > 0, y < 0, x > 10, y < -10},
+        {x0 > 0, y0 < 0},
+        {x0 > 0, y0 < 0, x0 > 10},
+        {x0 > 0, y0 < 0, x0 > 10, y0 < -10},
+        {x0 > 0, y0 < 0, x0 > 10, y0 < -10},
+        {x0 > 0, y0 < 0, x0 > 10, y0 < -10},
     ]
     expected_outer_if_path = [
-        {x > 0, y < 0},
-        {x > 0, y < 0, x > 10},
-        {x > 0, y < 0, x > 10, z3.Not(y < -10)},
-        {x > 0, y < 0, x > 10, z3.Not(y < -10)},
+        {x0 > 0, y0 < 0},
+        {x0 > 0, y0 < 0, x0 > 10},
+        {x0 > 0, y0 < 0, x0 > 10, z3.Not(y0 < -10)},
+        {x0 > 0, y0 < 0, x0 > 10, z3.Not(y0 < -10)},
     ]
     expected_other_path = [
-        {x > 0, y < 0},
-        {x > 0, y < 0, z3.Not(x > 10)},
-        {x > 0, y < 0, z3.Not(x > 10)},
+        {x0 > 0, y0 < 0},
+        {x0 > 0, y0 < 0, z3.Not(x0 > 10)},
+        {x0 > 0, y0 < 0, z3.Not(x0 > 10)},
     ]
 
     actual_path_first = []
@@ -341,24 +341,24 @@ def test_nested_while() -> None:
         print("done")
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
-    y = z3.Int("y")
+    x0 = z3.Int("x!0")
+    y0 = z3.Int("y!0")
     expected_inner_while_path = [
-        {x > 10, y > 10},
-        {x > 10, y > 10, x > 0},
-        {x > 10, y > 10, x > 0, y > 5},
+        {x0 > 10, y0 > 10},
+        {x0 > 10, y0 > 10, x0 > 0},
+        {x0 > 10, y0 > 10, x0 > 0, y0 > 5},
         set(),
     ]
     expected_outer_while_path = [
-        {x > 10, y > 10},
-        {x > 10, y > 10, x > 0},
-        {x > 10, y > 10, x > 0, z3.Not(y > 5)},
-        {x > 10, y > 10, x > 0, z3.Not(y > 5)},
+        {x0 > 10, y0 > 10},
+        {x0 > 10, y0 > 10, x0 > 0},
+        {x0 > 10, y0 > 10, x0 > 0, z3.Not(y0 > 5)},
+        {x0 > 10, y0 > 10, x0 > 0, z3.Not(y0 > 5)},
     ]
     expected_other_path = [
-        {x > 10, y > 10},
-        {x > 10, y > 10, z3.Not(x > 0)},
-        {x > 10, y > 10, z3.Not(x > 0)},
+        {x0 > 10, y0 > 10},
+        {x0 > 10, y0 > 10, z3.Not(x0 > 0)},
+        {x0 > 10, y0 > 10, z3.Not(x0 > 0)},
     ]
 
     actual_path_first = []
@@ -406,26 +406,26 @@ def test_break_in_while() -> None:
         print("break")
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
-    y = z3.Int("y")
+    x0 = z3.Int("x!0")
+    y0 = z3.Int("y!0")
     condition = z3.Bool("condition")
     expected_break_path = [
-        {x > y, condition},
-        {x > y, condition, condition},
-        {x > y, condition, condition, x < y},
-        {x > y, condition, condition, x < y},
-        {x > y, condition, condition, x < y},
+        {x0 > y0, condition},
+        {x0 > y0, condition, condition},
+        {x0 > y0, condition, condition, x0 < y0},
+        {x0 > y0, condition, condition, x0 < y0},
+        {x0 > y0, condition, condition, x0 < y0},
     ]
     expected_not_break_path = [
-        {x > y, condition},
-        {x > y, condition, condition},
-        {x > y, condition, condition, z3.Not(x < y)},
-        {x > y, condition, condition, z3.Not(x < y)},
+        {x0 > y0, condition},
+        {x0 > y0, condition, condition},
+        {x0 > y0, condition, condition, z3.Not(x0 < y0)},
+        {x0 > y0, condition, condition, z3.Not(x0 < y0)},
     ]
     expected_other_path = [
-        {x > y, condition},
-        {x > y, condition, z3.Not(condition)},
-        {x > y, condition, z3.Not(condition)},
+        {x0 > y0, condition},
+        {x0 > y0, condition, z3.Not(condition)},
+        {x0 > y0, condition, z3.Not(condition)},
     ]
 
     actual_path_first = []
@@ -473,24 +473,24 @@ def test_continue_in_while() -> None:
         print("done")
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
-    y = z3.Int("y")
+    x0 = z3.Int("x!0")
+    y0 = z3.Int("y!0")
     expected_continue_path = [
-        {x > 10, y > 0},
-        {x > 10, y > 0, x > 0},
-        {x > 10, y > 0, x > 0, x < y},
-        {x > 10, y > 0, x > 0, x < y},
+        {x0 > 10, y0 > 0},
+        {x0 > 10, y0 > 0, x0 > 0},
+        {x0 > 10, y0 > 0, x0 > 0, x0 < y0},
+        {x0 > 10, y0 > 0, x0 > 0, x0 < y0},
     ]
     expected_not_continue_path = [
-        {x > 10, y > 0},
-        {x > 10, y > 0, x > 0},
-        {x > 10, y > 0, x > 0, z3.Not(x < y)},
+        {x0 > 10, y0 > 0},
+        {x0 > 10, y0 > 0, x0 > 0},
+        {x0 > 10, y0 > 0, x0 > 0, z3.Not(x0 < y0)},
         set(),
     ]
     expected_other_path = [
-        {x > 10, y > 0},
-        {x > 10, y > 0, z3.Not(x > 0)},
-        {x > 10, y > 0, z3.Not(x > 0)},
+        {x0 > 10, y0 > 0},
+        {x0 > 10, y0 > 0, z3.Not(x0 > 0)},
+        {x0 > 10, y0 > 0, z3.Not(x0 > 0)},
     ]
 
     actual_path_first = []
@@ -535,9 +535,15 @@ def test_variable_reassignment() -> None:
         print("final x:", x)
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Real("x")
-    assert cfg.start.successors[0].z3_constraints == {0: [z3.Or(x == 1.0, x == 2.0, x == 3.0)]}
-    assert cfg.end.predecessors[0].z3_constraints == {0: []}
+    x0 = z3.Real("x!0")
+    x1 = z3.String("x!1")
+    expected_precondition = z3.Or(x0 == 1, x0 == 2, x0 == 3)
+    assert _constraints_equivalent(
+        cfg.start.successors[0].z3_constraints[0], [expected_precondition]
+    )
+    assert _constraints_equivalent(
+        cfg.end.predecessors[0].z3_constraints[0], [expected_precondition, x1 == "x"]
+    )
 
 
 def test_variable_augumented_reassign() -> None:
@@ -552,9 +558,10 @@ def test_variable_augumented_reassign() -> None:
         print("final x:", x)
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
-    assert cfg.start.successors[0].z3_constraints == {0: [z3.simplify(x > 10)]}
-    assert cfg.end.predecessors[0].z3_constraints == {0: []}
+    x0 = z3.Int("x!0")
+    x1 = z3.Int("x!1")
+    assert cfg.start.successors[0].z3_constraints == {0: [z3.simplify(x0 > 10)]}
+    assert cfg.end.predecessors[0].z3_constraints == {0: [z3.simplify(x0 > 10), x1 == x0 - 5]}
 
 
 def test_variable_annotated_reassignment() -> None:
@@ -569,9 +576,12 @@ def test_variable_annotated_reassignment() -> None:
         print("final x:", x)
     """
     cfg = _create_cfg(src, "func")
-    x = z3.String("x")
-    assert cfg.start.successors[0].z3_constraints == {0: [z3.SubString(x, 0, 2) == "ab"]}
-    assert cfg.end.predecessors[0].z3_constraints == {0: []}
+    x0 = z3.String("x!0")
+    x1 = z3.String("x!1")
+    assert cfg.start.successors[0].z3_constraints == {0: [z3.SubString(x0, 0, 2) == "ab"]}
+    assert cfg.end.predecessors[0].z3_constraints == {
+        0: [z3.SubString(x0, 0, 2) == "ab", x1 == "cd"]
+    }
 
 
 def test_variable_reassignment_in_branch() -> None:
@@ -588,17 +598,17 @@ def test_variable_reassignment_in_branch() -> None:
         print("final x:", x)
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Real("x")
+    x0 = z3.Real("x!0")
     expected_if_path = [
-        {z3.Or(x == 1.0, x == 2.0, x == 3.0)},
-        {z3.Or(x == 1.0, x == 2.0, x == 3.0), x < 5},
+        {z3.Or(x0 == 1.0, x0 == 2.0, x0 == 3.0)},
+        {z3.Or(x0 == 1.0, x0 == 2.0, x0 == 3.0), x0 < 5},
         set(),
         set(),
     ]
     expected_else_path = [
-        {z3.Or(x == 1.0, x == 2.0, x == 3.0)},
-        {z3.Or(x == 1.0, x == 2.0, x == 3.0), z3.Not(x < 5)},
-        {z3.Or(x == 1.0, x == 2.0, x == 3.0), z3.Not(x < 5)},
+        {z3.Or(x0 == 1.0, x0 == 2.0, x0 == 3.0)},
+        {z3.Or(x0 == 1.0, x0 == 2.0, x0 == 3.0), z3.Not(x0 < 5)},
+        {z3.Or(x0 == 1.0, x0 == 2.0, x0 == 3.0), z3.Not(x0 < 5)},
     ]
 
     actual_path_first = []
@@ -632,8 +642,8 @@ def test_ignored_precondition() -> None:
         print(x)
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
-    expected = {0: [z3.simplify(x > 5)]}
+    x0 = z3.Int("x!0")
+    expected = {0: [z3.simplify(x0 > 5)]}
     assert all(edge.z3_constraints == expected for edge in cfg.get_edges())
 
 
@@ -651,9 +661,9 @@ def test_ignored_if_condition() -> None:
                 print(x)
         """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
+    x0 = z3.Int("x!0")
     edge_values = [value for edge in cfg.get_edges() for value in edge.z3_constraints.values()]
-    expected = [z3.simplify(x > 5)]
+    expected = [z3.simplify(x0 > 5)]
     assert all(value == expected for value in edge_values)
 
 
@@ -670,9 +680,9 @@ def test_ignored_while_condition() -> None:
         print(x)
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
+    x0 = z3.Int("x!0")
     edge_values = [value for edge in cfg.get_edges() for value in edge.z3_constraints.values()]
-    expected = [z3.simplify(x > 5)]
+    expected = [z3.simplify(x0 > 5)]
     assert all(value == expected for value in edge_values)
 
 
@@ -689,24 +699,25 @@ def test_variable_reassignment_in_while_loop() -> None:
             x += 1
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
+    x0 = z3.Int("x!0")
+    x1 = z3.Int("x!1")
 
     expected_if_true_path = [
-        {x == 0},
-        {x < 10},
-        {x < 10, x == 0},
-        {x < 10, x == 0},
-        set(),
+        {x0 == 0},
+        {x0 < 10},
+        {x0 < 10, x0 == 0},
+        {x0 < 10, x0 == 0},
+        {x0 < 10, x0 == 0, x1 == x0 + 1},
     ]
     expected_if_false_path = [
-        {x == 0},
-        {x < 10},
-        set(),
-        {x < 10, z3.Not(x == 0)},
+        {x0 == 0},
+        {x0 < 10},
+        {x0 < 10, z3.Not(x0 == 0), x1 == x0 + 1},
+        {x0 < 10, z3.Not(x0 == 0)},
     ]
     expected_while_false_path = [
-        {x == 0},
-        {z3.Not(x < 10)},
+        {x0 == 0},
+        {z3.Not(x0 < 10)},
     ]
 
     actual_path_first = []
@@ -727,15 +738,15 @@ def test_variable_reassignment_in_while_loop() -> None:
     assert len(actual_path_second) == len(expected_if_false_path)
     assert len(actual_path_third) == len(expected_while_false_path)
     assert all(
-        set(actual) == expected
+        _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_first, expected_if_true_path)
     )
     assert all(
-        set(actual) == expected
+        _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_second, expected_if_false_path)
     )
     assert all(
-        set(actual) == expected
+        _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_third, expected_while_false_path)
     )
 
@@ -752,17 +763,18 @@ def test_variable_reassignment_in_unsatisfiable_loop_remains() -> None:
         print(x)
     """
     cfg = _create_cfg(src, "func")
-    x = z3.Int("x")
+    x0 = z3.Int("x!0")
+    x1 = z3.Int("x!1")
 
     expected_while_true_path = [
-        {x == 0},
-        {x == 0, x > 0},
-        set(),
+        {x0 == 0},
+        {x0 == 0, x0 > 0},
+        {x0 == 0, x0 > 0, x1 == x0 - 1},
     ]
     expected_while_false_path = [
-        {x == 0},
-        {x == 0, z3.Not(x > 0)},
-        {x == 0, z3.Not(x > 0)},
+        {x0 == 0},
+        {x0 == 0, z3.Not(x0 > 0)},
+        {x0 == 0, z3.Not(x0 > 0)},
     ]
 
     actual_path_first = []
@@ -778,11 +790,11 @@ def test_variable_reassignment_in_unsatisfiable_loop_remains() -> None:
     assert len(actual_path_first) == len(expected_while_true_path)
     assert len(actual_path_second) == len(expected_while_false_path)
     assert all(
-        set(actual) == expected
+        _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_first, expected_while_true_path)
     )
     assert all(
-        set(actual) == expected
+        _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_second, expected_while_false_path)
     )
 
@@ -806,3 +818,10 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
 
     assert func_node is not None
     return visitor.cfgs[func_node]
+
+
+def _constraints_equivalent(actual: list[z3.ExprRef], expected: list[z3.ExprRef]) -> bool:
+    """Check if two lists of z3 constraints, actual and expected, are equivalent"""
+    solver = z3.Solver()
+    solver.add(z3.Xor(z3.And(*actual), z3.And(*expected)))
+    return solver.check() == z3.unsat

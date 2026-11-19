@@ -111,7 +111,7 @@ def test_unfeasible_while_condition_with_reassignment() -> None:
         print("end")
     """
     cfg = _create_cfg(src, "func")
-    expected_while_path = [True, False, True]
+    expected_while_path = [True, False, False]
     expected_other_path = [True, True, True]
 
     paths = cfg.get_paths()
@@ -320,9 +320,9 @@ def test_variable_reassignment() -> None:
     """
     cfg = _create_cfg(src, "func")
     expected_if_path1 = [True, False, False, True, True]
-    expected_if_path2 = [True, False, False, True]
+    expected_if_path2 = [True, False, False, False]
     expected_other_path1 = [True, True, True, True]
-    expected_other_path2 = [True, True, True]
+    expected_other_path2 = [True, True, False]
 
     paths = cfg.get_paths()
     assert all(edge.is_feasible == expected for edge, expected in zip(paths[0], expected_if_path1))

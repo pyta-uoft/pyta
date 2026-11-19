@@ -52,7 +52,7 @@ class Z3Parser:
         elif isinstance(node, (nodes.Expr, nodes.Assign)):
             node = self.parse(node.value)
         elif isinstance(node, nodes.Const):
-            node = node.value
+            node = self.parse_const(node.value)
         elif isinstance(node, nodes.Name):
             node = self.apply_name(node.name)
         elif isinstance(node, nodes.AssignName):
@@ -83,7 +83,8 @@ class Z3Parser:
         if isinstance(typ, z3.ExprRef):  # the value is already a z3 variable
             x = typ
         elif typ in type_to_z3:  # convert string value to z3 variable
-            x = type_to_z3[typ](name)
+            # suffix !0 is used to indicate the initial version of the variable
+            x = type_to_z3[typ](f"{name}!0")
         else:
             raise Z3ParseException(f"Unhandled type {typ}.")
 
@@ -234,6 +235,19 @@ class Z3Parser:
         values = [self.parse(x) for x in values]
 
         return self.apply_bool_op(op, values)
+
+    def parse_const(self, value: Any) -> z3.ExprRef:
+        """Convert a Python constant to a z3 expression."""
+        if isinstance(value, bool):
+            return z3.BoolVal(value)
+        elif isinstance(value, int):
+            return z3.IntVal(value)
+        elif isinstance(value, float):
+            return z3.RealVal(value)
+        elif isinstance(value, str):
+            return z3.StringVal(value)
+        else:
+            raise Z3ParseException(f"Unsupported constant type {type(value)}.")
 
     def parse_container_op(
         self, node: Union[nodes.List, nodes.Set, nodes.Tuple]

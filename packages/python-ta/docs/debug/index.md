@@ -666,19 +666,19 @@ The first snapshot comment has no arguments, so it uses the default and saves to
 
 When running from the command line, options given to the command set the defaults instead:
 
-| Option                            | `snapshot()` argument                                                                             |
-| --------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `--save/--no-save`                | `save` (default: `--save`)                                                                        |
-| `--memory-viz-args "ARGS"`        | `memory_viz_args`, split like a shell command (e.g. `"--width 1000 --roughjs-config seed=12345"`) |
-| `--memory-viz-version VERSION`    | `memory_viz_version`                                                                              |
-| `--include-frame NAME1,NAME2,...` | `include_frames`, as a comma-separated list                                                       |
-| `--exclude-frame NAME1,NAME2,...` | `exclude_frames`, as a comma-separated list                                                       |
-| `--exclude-var NAME1,NAME2,...`   | `exclude_vars`, as a comma-separated list                                                         |
+| Option                             | `snapshot()` argument                                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `--save/--no-save`                 | `save` (default: `--save`)                                                                        |
+| `--memory-viz-args "ARGS"`         | `memory_viz_args`, split like a shell command (e.g. `"--width 1000 --roughjs-config seed=12345"`) |
+| `--memory-viz-version VERSION`     | `memory_viz_version`                                                                              |
+| `--include-frames NAME1,NAME2,...` | `include_frames`, as a comma-separated list                                                       |
+| `--exclude-frames NAME1,NAME2,...` | `exclude_frames`, as a comma-separated list                                                       |
+| `--exclude-vars NAME1,NAME2,...`   | `exclude_vars`, as a comma-separated list                                                         |
 
 For example:
 
 ```console
-$ python -m python_ta.debug snapshot demo.py --memory-viz-args "--width 1000" --exclude-var message
+$ python -m python_ta.debug snapshot demo.py --memory-viz-args "--width 1000" --exclude-vars message
 ```
 
 ### API

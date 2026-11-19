@@ -35,21 +35,21 @@ def main() -> None:
 )
 @click.option("--memory-viz-version", help="Version of MemoryViz to use.")
 @click.option(
-    "--include-frame",
+    "--include-frames",
     "include_frames",
     callback=_split_comma_list,
     help="Only capture variables from the given functions, as a comma-separated list "
     "(e.g. func1,func2).",
 )
 @click.option(
-    "--exclude-frame",
+    "--exclude-frames",
     "exclude_frames",
     callback=_split_comma_list,
     help="Do not capture variables from the given functions, as a comma-separated list "
     "(e.g. func1,func2).",
 )
 @click.option(
-    "--exclude-var",
+    "--exclude-vars",
     "exclude_vars",
     callback=_split_comma_list,
     help="Do not capture the given variables, as a comma-separated list (e.g. x,y).",

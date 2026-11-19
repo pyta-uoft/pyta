@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import base64
 import copy
 import inspect
@@ -16,9 +17,12 @@ from jinja2 import Environment, FileSystemLoader
 from ..util.servers.one_shot_server import open_html_in_browser
 from .id_tracker import IDTracker
 from .snapshot import snapshot, snapshot_to_json
+from .util import exec_as_main
 
 if TYPE_CHECKING:
     import types
+
+TRACER_ALIAS = "__snapshot_tracer__"
 
 
 class SnapshotTracer:
@@ -125,9 +129,9 @@ class SnapshotTracer:
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
-        self._start_lineno = (
-            func_frame.f_lineno + 1
-        )  # add 1 to account for the line of the with statement
+        # Add 1 to account for the line of the with statement. Keep an earlier start line if
+        # one was already set (e.g., by run_with_snapshot_tracer).
+        self._start_lineno = min(self._start_lineno, func_frame.f_lineno + 1)
         func_frame.f_trace = self._trace_func
         origin_file = func_frame.f_globals.get("__file__")
         self._origin_file = (
@@ -207,3 +211,107 @@ class SnapshotTracer:
     def snapshots(self) -> list[dict[str, Any]]:
         """Return the snapshots taken at each line of code."""
         return self._snapshots
+
+
+def run_with_snapshot_tracer(path: str, **kwargs: Any) -> SnapshotTracer:
+    """Run the given Python file with all of its code traced by a SnapshotTracer, as if the
+    whole file were inside a `with SnapshotTracer(...):` block.
+
+    The Webstepper opens by default (webstepper=True) once the file finishes running.
+
+    Args:
+        path: The path to the Python file to run.
+        **kwargs: Keyword arguments passed to SnapshotTracer. Refer to SnapshotTracer for more
+            details.
+
+    Returns:
+        The SnapshotTracer used to trace the file, which holds the snapshots taken.
+    """
+    # utf-8-sig strips the BOM at the start of the file, which ast.parse would reject
+    with open(path, encoding="utf-8-sig") as f:
+        source = f.read()
+
+    tree = ast.parse(source, filename=path)
+    with_node = _wrap_module_in_tracer(tree)
+    code = compile(tree, filename=path, mode="exec")
+
+    tracer = SnapshotTracer(**{"webstepper": True, **kwargs})
+    if with_node is not None:
+        tracer._start_lineno = with_node.lineno + 1
+
+    exec_as_main(code, path, {TRACER_ALIAS: tracer})
+    return tracer
+
+
+def _wrap_module_in_tracer(tree: ast.Module) -> Optional[ast.With]:
+    """Wrap the body of the given module in a `with` block using the tracer named
+    TRACER_ALIAS, and return the new `with` node. Mutates the given module.
+
+    A leading module docstring and any `from __future__` imports stay outside the `with`
+    block, as they must come first in a module. The wrapped statements keep their original
+    line numbers.
+
+    Return None (and leave the module unchanged) if there are no statements to wrap.
+
+    Args:
+        tree: The parsed module to wrap.
+    """
+    body = tree.body
+    num_header = _get_num_header_statements(body)
+    header, wrapped = body[:num_header], body[num_header:]
+    if not wrapped:
+        return None
+
+    # Put the `with` statement on the line before the first wrapped statement
+    first = wrapped[0]
+    first_lineno = min(
+        [first.lineno] + [decorator.lineno for decorator in getattr(first, "decorator_list", [])]
+    )
+    with_lineno = first_lineno - 1
+
+    # The variable TRACER_ALIAS to be used in the `with` statement
+    tracer_name = ast.Name(
+        id=TRACER_ALIAS,
+        ctx=ast.Load(),
+        lineno=with_lineno,
+        col_offset=0,
+        end_lineno=with_lineno,
+        end_col_offset=0,
+    )
+    # The `with` statement that wraps the module body
+    with_node = ast.With(
+        items=[ast.withitem(context_expr=tracer_name)],
+        body=wrapped,
+        lineno=with_lineno,
+        col_offset=0,
+        end_lineno=wrapped[-1].end_lineno,
+        end_col_offset=wrapped[-1].end_col_offset,
+    )
+    tree.body = header + [with_node]
+    return with_node
+
+
+def _get_num_header_statements(body: list[ast.stmt]) -> int:
+    """Return the number of header statements at the start of the given module body.
+
+    The header is the leading run of string literal expressions (e.g. the module
+    docstring) and `from __future__` imports, since they must come before any other code
+    in a module.
+
+    Args:
+        body: The statements of a parsed module.
+    """
+    num_header = 0
+    for statement in body:
+        is_string = (
+            isinstance(statement, ast.Expr)
+            and isinstance(statement.value, ast.Constant)
+            and isinstance(statement.value.value, str)
+        )
+        is_future_import = (
+            isinstance(statement, ast.ImportFrom) and statement.module == "__future__"
+        )
+        if not (is_string or is_future_import):
+            break
+        num_header += 1
+    return num_header

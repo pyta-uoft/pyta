@@ -12,7 +12,6 @@ import functools
 import inspect
 import json
 import logging
-import os
 import re
 import shutil
 import subprocess
@@ -25,6 +24,7 @@ from asttokens.util import Token, replace
 from packaging.version import Version, parse
 
 from .id_tracker import IDTracker
+from .util import exec_as_main
 
 if TYPE_CHECKING:
     from types import FrameType
@@ -350,14 +350,7 @@ def run_with_snapshots(path: str, **kwargs: Any) -> None:
     code = compile(transform_snapshot_comments(path), filename=path, mode="exec")
 
     snapshot_func = functools.partial(snapshot, **{"save": True, **kwargs})
-
-    # Add the file's directory to the import path, as running it directly would
-    old_path = sys.path[:]
-    sys.path.insert(0, os.path.dirname(os.path.abspath(path)))
-    try:
-        exec(code, {"__name__": "__main__", "__file__": path, SNAPSHOT_ALIAS: snapshot_func})
-    finally:
-        sys.path[:] = old_path
+    exec_as_main(code, path, {SNAPSHOT_ALIAS: snapshot_func})
 
 
 def transform_snapshot_comments(path: str) -> str:

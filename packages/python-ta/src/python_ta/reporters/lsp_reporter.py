@@ -8,6 +8,10 @@ from pylint.reporters.ureports.nodes import Section
 
 from .core import MessageLike, PythonTaReporter
 from python_ta.util.documentation import get_documentation_url
+from python_ta.util.source_positions import (
+    codepoint_offset_to_utf16,
+    message_column_to_utf16,
+)
 
 CATEGORY_TO_LSP = {
     "error": types.DiagnosticSeverity.Error,
@@ -48,18 +52,34 @@ class LSPReporter(PythonTaReporter):
         super().handle_message(msg)
 
     def _update_message_range(self, msg: Message) -> None:
-        """Mutate the message's location attributes for LSP output."""
+        """Mutate the message's range to use LSP's default UTF-16 position encoding."""
+        if 1 <= msg.line <= len(self.source_lines):
+            msg.column = message_column_to_utf16(
+                self.source_lines[msg.line - 1], msg.column or 0, msg.symbol
+            )
+
+        end_line = msg.end_line or msg.line
+        if msg.end_column is not None and 1 <= end_line <= len(self.source_lines):
+            msg.end_column = message_column_to_utf16(
+                self.source_lines[end_line - 1],
+                msg.end_column,
+                msg.symbol,
+                is_end=True,
+            )
 
         # Highlight only the first line of full-module messages
         if (
             self.source_lines
             and msg.line == 1
             and msg.column == 0
-            and msg.end_line == len(self.source_lines)
-            and msg.end_column == len(self.source_lines[-1])
+            and end_line == len(self.source_lines)
+            and msg.end_column
+            == codepoint_offset_to_utf16(self.source_lines[-1], len(self.source_lines[-1]))
         ):
             msg.end_line = msg.line
-            msg.end_column = len(self.source_lines[0])
+            msg.end_column = codepoint_offset_to_utf16(
+                self.source_lines[0], len(self.source_lines[0])
+            )
 
     def display_messages(self, layout: Section | None) -> None:
         output: list[dict] = []

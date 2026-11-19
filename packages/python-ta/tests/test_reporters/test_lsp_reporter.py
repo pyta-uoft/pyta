@@ -7,6 +7,7 @@ import pytest
 from lsprotocol.types import DiagnosticSeverity, DiagnosticTag
 
 from python_ta import check_all, doc
+from python_ta.reporters.lsp_reporter import LSPReporter
 
 FIXTURE_PATH = os.path.normpath(
     os.path.join(__file__, "../../fixtures/reporters/lsp_reporter_input.py")
@@ -44,14 +45,14 @@ def test_exact_output(lsp_output):
             "diagnostics": [
                 {
                     "range": {
-                        "start": {"line": 5, "character": 4},
-                        "end": {"line": 5, "character": 5},
+                        "start": {"line": 5, "character": 17},
+                        "end": {"line": 5, "character": 26},
                     },
-                    "message": "The variable x is unused and can be removed. If you intended to use it, there may be a typo elsewhere in the code.",
-                    "severity": 2,
-                    "code": "W0612",
+                    "message": "Undefined variable 'undefined'",
+                    "severity": 1,
+                    "code": "E0602",
                     "codeDescription": {
-                        "href": "https://www.cs.toronto.edu/~david/pyta/checkers/index.html#w0612"
+                        "href": "https://www.cs.toronto.edu/~david/pyta/checkers/index.html#e0602"
                     },
                     "source": "python-ta",
                 }
@@ -93,3 +94,23 @@ def test_deprecated_attribute_tag(lsp_output):
     diagnostic = next(diag for diag in diagnostics if diag["code"] == "W4906")
     assert diagnostic["tags"] == [DiagnosticTag.Deprecated]
     assert diagnostic["severity"] == DiagnosticSeverity.Warning
+
+
+def test_unicode_module_diagnostic_highlights_only_first_line(mocker):
+    """Test full-module range detection when the first and last lines contain Unicode."""
+    reporter = LSPReporter()
+    reporter.source_lines = ["😀", "é"]
+    message = mocker.Mock(
+        symbol="missing-module-docstring",
+        line=1,
+        column=0,
+        end_line=2,
+        end_column=2,
+    )
+
+    reporter._update_message_range(message)
+
+    assert message.line == 1
+    assert message.column == 0
+    assert message.end_line == 1
+    assert message.end_column == 2

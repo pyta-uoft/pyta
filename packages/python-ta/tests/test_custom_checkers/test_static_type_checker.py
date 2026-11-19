@@ -7,6 +7,10 @@ import pylint.testutils
 from astroid import MANAGER
 
 from python_ta.checkers.static_type_checker import StaticTypeChecker
+from python_ta.reporters.node_printers import (
+    LineType,
+    render_static_type_checker_errors,
+)
 
 DIR_PATH = os.path.normpath(
     os.path.join(
@@ -26,7 +30,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="incompatible-argument-type",
                 line=5,
-                col_offset=23,
+                col_offset=22,
                 end_line=5,
                 end_col_offset=28,
                 args=("1", "calculate_area", "str", "float"),
@@ -34,12 +38,11 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="incompatible-argument-type",
                 line=11,
-                col_offset=27,
+                col_offset=26,
                 end_line=11,
                 end_col_offset=27,
                 args=("1", "convert_to_upper", "int", "str"),
             ),
-            ignore_position=True,
         ):
             self.checker.process_module(mod)
 
@@ -50,7 +53,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="incompatible-assignment",
                 line=2,
-                col_offset=7,
+                col_offset=6,
                 end_line=2,
                 end_col_offset=19,
                 args=("str", "int"),
@@ -58,7 +61,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="incompatible-assignment",
                 line=4,
-                col_offset=14,
+                col_offset=13,
                 end_line=4,
                 end_col_offset=18,
                 args=("str", "int"),
@@ -73,7 +76,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="list-item-type-mismatch",
                 line=1,
-                col_offset=37,
+                col_offset=36,
                 end_line=1,
                 end_col_offset=37,
                 args=("2", "int", "str"),
@@ -81,7 +84,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="list-item-type-mismatch",
                 line=3,
-                col_offset=29,
+                col_offset=28,
                 end_line=3,
                 end_col_offset=35,
                 args=("2", "str", "int"),
@@ -89,7 +92,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="list-item-type-mismatch",
                 line=5,
-                col_offset=33,
+                col_offset=32,
                 end_line=5,
                 end_col_offset=37,
                 args=("2", "str", "float"),
@@ -104,7 +107,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="unsupported-operand-types",
                 line=1,
-                col_offset=10,
+                col_offset=9,
                 end_line=1,
                 end_col_offset=10,
                 args=("-", "str", "int"),
@@ -112,7 +115,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="unsupported-operand-types",
                 line=3,
-                col_offset=14,
+                col_offset=13,
                 end_line=3,
                 end_col_offset=17,
                 args=("+", "int", "str"),
@@ -120,7 +123,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="unsupported-operand-types",
                 line=5,
-                col_offset=15,
+                col_offset=14,
                 end_line=5,
                 end_col_offset=17,
                 args=("*", "float", "str"),
@@ -136,7 +139,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="union-attr-error",
                 line=4,
-                col_offset=13,
+                col_offset=12,
                 end_line=5,
                 end_col_offset=18,
                 args=("int", "upper"),
@@ -144,7 +147,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="union-attr-error",
                 line=4,
-                col_offset=13,
+                col_offset=12,
                 end_line=5,
                 end_col_offset=18,
                 args=("float", "upper"),
@@ -152,7 +155,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="union-attr-error",
                 line=9,
-                col_offset=12,
+                col_offset=11,
                 end_line=9,
                 end_col_offset=20,
                 args=("list[Any]", "keys"),
@@ -170,7 +173,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="dict-item-type-mismatch",
                 line=1,
-                col_offset=45,
+                col_offset=44,
                 end_line=1,
                 end_col_offset=54,
                 args=("2", "str", "int", "int", "str"),
@@ -178,7 +181,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="dict-item-type-mismatch",
                 line=3,
-                col_offset=50,
+                col_offset=49,
                 end_line=3,
                 end_col_offset=60,
                 args=("2", "int", "str", "str", "float"),
@@ -236,7 +239,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="incompatible-argument-type",
                 line=5,
-                col_offset=23,
+                col_offset=22,
                 end_line=5,
                 end_col_offset=28,
                 args=("1", "calculate_area", "str", "float"),
@@ -244,12 +247,11 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="incompatible-argument-type",
                 line=11,
-                col_offset=27,
+                col_offset=26,
                 end_line=11,
                 end_col_offset=27,
                 args=("1", "convert_to_upper", "int", "str"),
             ),
-            ignore_position=True,
         ):
             self.checker.process_module(mod)
 
@@ -260,7 +262,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="incompatible-assignment",
                 line=2,
-                col_offset=7,
+                col_offset=6,
                 end_line=2,
                 end_col_offset=19,
                 args=("str", "int"),
@@ -268,7 +270,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="incompatible-assignment",
                 line=4,
-                col_offset=14,
+                col_offset=13,
                 end_line=4,
                 end_col_offset=18,
                 args=("str", "int"),
@@ -283,7 +285,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="list-item-type-mismatch",
                 line=1,
-                col_offset=37,
+                col_offset=36,
                 end_line=1,
                 end_col_offset=37,
                 args=("2", "int", "str"),
@@ -291,7 +293,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="list-item-type-mismatch",
                 line=3,
-                col_offset=29,
+                col_offset=28,
                 end_line=3,
                 end_col_offset=35,
                 args=("2", "str", "int"),
@@ -299,7 +301,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="list-item-type-mismatch",
                 line=5,
-                col_offset=33,
+                col_offset=32,
                 end_line=5,
                 end_col_offset=37,
                 args=("2", "str", "float"),
@@ -314,7 +316,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="unsupported-operand-types",
                 line=1,
-                col_offset=10,
+                col_offset=9,
                 end_line=1,
                 end_col_offset=10,
                 args=("-", "str", "int"),
@@ -322,7 +324,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="unsupported-operand-types",
                 line=3,
-                col_offset=14,
+                col_offset=13,
                 end_line=3,
                 end_col_offset=17,
                 args=("+", "int", "str"),
@@ -330,7 +332,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="unsupported-operand-types",
                 line=5,
-                col_offset=15,
+                col_offset=14,
                 end_line=5,
                 end_col_offset=17,
                 args=("*", "float", "str"),
@@ -346,7 +348,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="union-attr-error",
                 line=4,
-                col_offset=13,
+                col_offset=12,
                 end_line=5,
                 end_col_offset=18,
                 args=("int", "upper"),
@@ -354,7 +356,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="union-attr-error",
                 line=4,
-                col_offset=13,
+                col_offset=12,
                 end_line=5,
                 end_col_offset=18,
                 args=("float", "upper"),
@@ -362,7 +364,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="union-attr-error",
                 line=9,
-                col_offset=12,
+                col_offset=11,
                 end_line=9,
                 end_col_offset=20,
                 args=("list[Any]", "keys"),
@@ -380,7 +382,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="dict-item-type-mismatch",
                 line=1,
-                col_offset=45,
+                col_offset=44,
                 end_line=1,
                 end_col_offset=54,
                 args=("2", "str", "int", "int", "str"),
@@ -388,7 +390,7 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="dict-item-type-mismatch",
                 line=3,
-                col_offset=50,
+                col_offset=49,
                 end_line=3,
                 end_col_offset=60,
                 args=("2", "int", "str", "str", "float"),
@@ -428,3 +430,13 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
         ):
             with self.assertNoMessages():
                 self.checker.process_module(mod)
+
+
+def test_static_type_renderer_uses_zero_based_column(mocker) -> None:
+    """Test that normalized mypy columns are used directly when rendering."""
+    source_line = 'x = "wrong"'
+    message = mocker.Mock(line=1, column=4, end_line=1, end_column=11)
+
+    assert list(render_static_type_checker_errors(message, source_lines=[source_line])) == [
+        (1, slice(4, 11), LineType.ERROR, source_line)
+    ]

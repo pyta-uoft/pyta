@@ -121,10 +121,13 @@ class StaticTypeChecker(BaseRawFileChecker):
         msgid = code_to_msgid.get(code)
         if not msgid:
             return
+
+        # Mypy columns are one-based and inclusive; Pylint ranges are zero-based
+        # with an inclusive start and exclusive end, so only adjust the start.
         self.add_message(
             msgid,
             line=int(common_data["start_line"]),
-            col_offset=int(common_data["start_col"]),
+            col_offset=int(common_data["start_col"]) - 1,
             end_lineno=int(common_data["end_line"]),
             end_col_offset=int(common_data["end_col"]),
             args=tuple(specific_data.values()),

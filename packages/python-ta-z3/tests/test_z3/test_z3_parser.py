@@ -101,3 +101,21 @@ def test_parse_subscript_op_with_negative_indexes(source, expected) -> None:
     parser = Z3Parser({"python": z3.StringVal("python")})
     actual = parser.parse_subscript_op(extract_node(source))
     assert z3.eq(z3.simplify(actual), z3.StringVal(expected))
+
+
+@pytest.mark.parametrize(
+    "source, expected_unsat",
+    [
+        ('python[0] == "p"', False),
+        ('python[5] == "n"', False),
+        ('python[-1] == "n"', False),
+        ('python[-6] == "p"', False),
+        ('python[6] == ""', True),
+        ('python[-7] == ""', True),
+    ],
+)
+def test_parse_subscript_op_index_bounds(source, expected_unsat) -> None:
+    """Test that index bound constraints are correctly added for string indexing."""
+    parser = Z3Parser({"python": z3.StringVal("python")})
+    expr = parser.parse(extract_node(source))
+    assert _is_unsat(expr, *parser.parsing_constraints) is expected_unsat

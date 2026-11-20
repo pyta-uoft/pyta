@@ -328,6 +328,7 @@ class Z3Parser:
         # handle indexing
         index = self._parse_string_index(slice, value)
         if isinstance(index, (int, z3.ArithRef)):
+            self.parsing_constraints.append(z3.And(index >= 0, index < z3.Length(value)))
             return z3.SubString(value, index, 1)
 
         # handle slicing

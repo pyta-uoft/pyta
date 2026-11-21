@@ -495,11 +495,19 @@ class Z3Environment:
         """Handle a variable assignment statement.
         Update the variable's version and z3 expression.
         """
-        if name not in self.variables:
+        old_var = self.variables.get(name)
+        if old_var is not None:
+            # Variable already exists, increment version and create a new z3 variable
+            self.version_map[name] += 1
+            sort = value.sort() if value is not None else old_var.sort()
+        elif value is not None:
+            # New local variable, create a new z3 variable with version 0
+            self.version_map[name] = 0
+            sort = value.sort()
+        else:
+            # New local variable with no value, leave it untracked
             return
-        old_var = self.variables[name]
-        sort = value.sort() if value is not None else old_var.sort()
-        self.version_map[name] += 1
+
         new_var = z3.Const(f"{name}!{self.version_map[name]}", sort)
         if value is not None:
             self.constraints.append(new_var == value)

@@ -256,6 +256,24 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
 
+    def test_impossible_local_variable_condition(self):
+        src = """
+        def func(x: int) -> None:
+            '''
+            Precondition: x > 5
+            '''
+            y = x + 1
+            if y < 0:
+                print(y)
+        """
+        condition_node, *_ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node.test),
+            ignore_position=True,
+        ):
+            self.checker.visit_if(condition_node)
+
     def _apply_cfg_visitor(self, src: str) -> nodes.NodeNG:
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))

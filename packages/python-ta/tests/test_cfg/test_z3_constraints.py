@@ -647,7 +647,7 @@ def test_ignored_precondition() -> None:
     assert all(edge.z3_constraints == expected for edge in cfg.get_edges())
 
 
-def test_ignored_if_condition() -> None:
+def test_local_variable_if_condition() -> None:
     src = """
         def func(x: int) -> None:
             '''
@@ -662,12 +662,13 @@ def test_ignored_if_condition() -> None:
         """
     cfg = _create_cfg(src, "func")
     x0 = z3.Int("x!0")
+    a0 = z3.Int("a!0")
     edge_values = [value for edge in cfg.get_edges() for value in edge.z3_constraints.values()]
-    expected = [z3.simplify(x0 > 5)]
-    assert all(value == expected for value in edge_values)
+    assert all(_constraints_equivalent(value, value + [x0 > 5]) for value in edge_values)
+    assert any(_constraints_equivalent(value, value + [a0 == 10]) for value in edge_values)
 
 
-def test_ignored_while_condition() -> None:
+def test_local_variable_while_condition() -> None:
     src = """
     def func(x: int) -> None:
         '''
@@ -681,9 +682,10 @@ def test_ignored_while_condition() -> None:
     """
     cfg = _create_cfg(src, "func")
     x0 = z3.Int("x!0")
+    a0 = z3.Int("a!0")
     edge_values = [value for edge in cfg.get_edges() for value in edge.z3_constraints.values()]
-    expected = [z3.simplify(x0 > 5)]
-    assert all(value == expected for value in edge_values)
+    assert all(_constraints_equivalent(value, value + [x0 > 5]) for value in edge_values)
+    assert any(_constraints_equivalent(value, value + [a0 == 10]) for value in edge_values)
 
 
 def test_variable_reassignment_in_while_loop() -> None:
@@ -796,6 +798,55 @@ def test_variable_reassignment_in_unsatisfiable_loop_remains() -> None:
     assert all(
         _constraints_equivalent(actual, expected)
         for actual, expected in zip(actual_path_second, expected_while_false_path)
+    )
+
+
+def test_local_variable_assignment() -> None:
+    """Test that local variable assignments and conditions are added to the z3 constraints."""
+    src = """
+    def func(x: int) -> None:
+        '''
+        Precondition: x == 0
+        '''
+        y = x + 1
+        if y > 0:
+            print(y)
+        print(x)
+    """
+    cfg = _create_cfg(src, "func")
+    x0 = z3.Int("x!0")
+    y0 = z3.Int("y!0")
+
+    expected_if_true_path = [
+        {x0 == 0},
+        {x0 == 0, y0 == x0 + 1, y0 > 0},
+        {x0 == 0, y0 == x0 + 1, y0 > 0},
+        {x0 == 0, y0 == x0 + 1, y0 > 0},
+    ]
+    expected_if_false_path = [
+        {x0 == 0},
+        {x0 == 0, y0 == x0 + 1, z3.Not(y0 > 0)},
+        {x0 == 0, y0 == x0 + 1, z3.Not(y0 > 0)},
+    ]
+    actual_path_first = []
+    actual_path_second = []
+    for edge in cfg.get_edges():
+        actual1 = edge.z3_constraints.get(0)
+        actual2 = edge.z3_constraints.get(1)
+        if actual1 is not None:
+            actual_path_first.append(actual1)
+        if actual2 is not None:
+            actual_path_second.append(actual2)
+
+    assert len(actual_path_first) == len(expected_if_true_path)
+    assert len(actual_path_second) == len(expected_if_false_path)
+    assert all(
+        _constraints_equivalent(actual, expected)
+        for actual, expected in zip(actual_path_first, expected_if_true_path)
+    )
+    assert all(
+        _constraints_equivalent(actual, expected)
+        for actual, expected in zip(actual_path_second, expected_if_false_path)
     )
 
 

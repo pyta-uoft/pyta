@@ -252,7 +252,12 @@ def test_for_loop() -> None:
     x0 = z3.String("x!0")
     y0 = z3.Int("y!0")
     assert all(
-        set(constraints) == {z3.simplify(z3.SubString(x0, 0, 1) == "a"), z3.simplify(y0 > 0)}
+        set(constraints)
+        == {
+            z3.simplify(z3.SubString(x0, 0, 1) == "a"),
+            z3.simplify(z3.And(0 >= 0, 0 < z3.Length(x0))),
+            z3.simplify(y0 > 0),
+        }
         for edge in cfg.get_edges()
         for constraints in edge.z3_constraints.values()
     )

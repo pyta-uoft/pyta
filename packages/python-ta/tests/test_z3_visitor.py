@@ -290,11 +290,15 @@ string_expected = [
     [z3.Not(z3.Contains("abc", x)), z3.Not(z3.Contains(y, x))],
     [
         z3.SubString(x, 0, 1) == y,
+        z3.And(0 >= 0, 0 < z3.Length(x)),
         z3.SubString(x, 1, 1) == "a",
+        z3.And(1 >= 0, 1 < z3.Length(x)),
     ],
     [
         z3.SubString(x, z3.Length(x) - 1, 1) == "b",
+        z3.And(z3.Length(x) - 1 >= 0, z3.Length(x) - 1 < z3.Length(x)),
         z3.SubString(x, z3.Length(x) - 2, 1) == y,
+        z3.And(z3.Length(x) - 2 >= 0, z3.Length(x) - 2 < z3.Length(x)),
     ],
     [
         z3.SubString(x, 1, 3) == y,

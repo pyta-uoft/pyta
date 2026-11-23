@@ -111,8 +111,11 @@ def trace(
     exclude_frames: Optional[list[str]],
     exclude_vars: Optional[list[str]],
 ) -> None:
-    """Run FILE with all of its code traced by a SnapshotTracer, then open the Webstepper
-    to step through the memory diagram at each line.
+    """Run FILE with its code traced by a SnapshotTracer, then open the Webstepper to step
+    through the memory diagram at each line.
+
+    Only the code between "# pyta: snapshot-tracer-start" and "# pyta: snapshot-tracer-end"
+    comments is traced, if FILE has them. Otherwise, all of FILE is traced.
     """
     kwargs: dict[str, Any] = {}
     if include_frames:

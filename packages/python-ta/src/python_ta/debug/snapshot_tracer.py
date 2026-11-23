@@ -30,7 +30,7 @@ TRACER_ALIAS = "__snapshot_tracer__"
 
 TRACER_COMMENT_PATTERN = re.compile(r"#\s*pyta:\s*snapshot-tracer-(start|end)\s*")
 
-# Tokens that do not start or end a statement, skipped when looking for the next code
+# Tokens that are not code, skipped when finding the code between the snapshot-tracer comments
 _NON_CODE_TOKEN_TYPES = (
     tokenize.NL,
     tokenize.NEWLINE,
@@ -386,8 +386,8 @@ def _wrap_marked_block_in_tracer(
     Return None (and leave the tree unchanged) if there is no code between the comments, so
     that nothing is traced.
 
-    Raise a SyntaxError pointing at the comment at fault if the comments do not mark a block
-    of statements that can be wrapped in a `with` block.
+    Raise a SyntaxError pointing at the comment at fault if the code between the comments is
+    not a run of whole statements in one block.
 
     Args:
         tokens: The tokens and parsed tree of the file.
@@ -395,41 +395,43 @@ def _wrap_marked_block_in_tracer(
         end: The snapshot-tracer-end comment token, which comes after start.
         filename: The path to the file, used in error messages.
     """
-    # If there is no code between the comments, there is nothing to trace
-    first = _next_code_token(tokens, start)
-    if end.index < first.index:
+    code = [
+        tok
+        for tok in tokens.tokens[start.index + 1 : end.index]
+        if tok.type not in _NON_CODE_TOKEN_TYPES and tok.string != ";"
+    ]
+    if not code:
         return None
 
     # The start comment must be directly followed by a statement
     assert tokens.tree is not None  # parse=True always builds the tree
-    location = _find_statement_starts(tokens.tree).get(first.index)
+    location = _find_statement_starts(tokens.tree).get(code[0].index)
     if location is None:
         raise _comment_error(
             start, "snapshot-tracer-start must be directly followed by a statement", filename
         )
 
-    # Wrap every statement from the first statement to the end comment, staying in the first
-    # statement's block.
-    statements, first_index = location
-    last_index = first_index
-    while (
-        last_index + 1 < len(statements)
-        and statements[last_index + 1].first_token.index < end.index  # type: ignore[attr-defined]
-    ):
-        last_index += 1
-
-    last_token = statements[last_index].last_token  # type: ignore[attr-defined]
-    if end.index < last_token.index:
-        raise _comment_error(end, "snapshot-tracer-end must follow a complete statement", filename)
-
-    after = _next_code_token(tokens, last_token)
-    if after.index < end.index:
+    # The end comment must directly follow a statement in the same block
+    statements, first = location
+    last = next(
+        (
+            i
+            for i in range(first, len(statements))
+            if statements[i].last_token.index == code[-1].index  # type: ignore[attr-defined]
+        ),
+        None,
+    )
+    if last is None:
         raise _comment_error(
-            end, "snapshot-tracer-end must be in the same block as snapshot-tracer-start", filename
+            end,
+            "snapshot-tracer-end must be in the same block as snapshot-tracer-start, "
+            "right after a statement",
+            filename,
         )
 
-    wrapped = slice(first_index, last_index + 1)
-    with_node = _build_with_tracer_statement(statements[wrapped], start.start[0], start.start[1])
+    wrapped = slice(first, last + 1)
+    line, col = start.start
+    with_node = _build_with_tracer_statement(statements[wrapped], line, col)
     statements[wrapped] = [with_node]
     return with_node
 
@@ -490,17 +492,3 @@ def _find_statement_starts(tree: ast.AST) -> dict[int, tuple[list[ast.stmt], int
                 for index, stmt in enumerate(stmts):
                     starts[stmt.first_token.index] = (stmts, index)  # type: ignore[attr-defined]
     return starts
-
-
-def _next_code_token(tokens: asttokens.ASTTokens, tok: Token) -> Token:
-    """Return the next token after tok that is code, skipping comments, line breaks,
-    indentation changes and semicolons. Return the ENDMARKER token if there is no more code.
-
-    Args:
-        tokens: The tokens of the file.
-        tok: The token to start after.
-    """
-    tok = tokens.next_token(tok, include_extra=True)
-    while tok.type in _NON_CODE_TOKEN_TYPES or tok.string == ";":
-        tok = tokens.next_token(tok, include_extra=True)
-    return tok

@@ -367,6 +367,59 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_if(condition_node)
 
+    def test_redundant_local_variable_condition(self):
+        src = """
+            def func(x: int) -> int:
+                '''
+                Precondition: x >= 0
+                '''
+                y = 0
+                if y == 0:
+                    x = 10
+                return x
+            """
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node.test),
+            ignore_position=True,
+        ):
+            self.checker.visit_if(condition_node)
+
+    def test_redundant_local_variable_by_reassignment(self):
+        src = """
+        def func(x: int) -> None:
+            '''
+            Precondition: x >= 1
+            '''
+            y = 0
+            y += x
+            if y >= 1:
+                print(y)
+            print(x)
+        """
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node.test),
+            ignore_position=True,
+        ):
+            self.checker.visit_if(condition_node)
+
+    def test_not_redundant_local_variable_condition(self):
+        src = """
+        def func(x: int) -> None:
+            '''
+            Precondition: x >= 0
+            '''
+            y = 0
+            y += x
+            if y == 0:
+                x = 10
+            print(x)
+        """
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
+        with self.assertNoMessages():
+            self.checker.visit_if(condition_node)
+
     def _apply_cfg_visitor(self, src: str) -> nodes.NodeNG:
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))

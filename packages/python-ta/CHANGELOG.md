@@ -23,6 +23,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Extended `python_ta.debug.run_with_snapshots` to take in `**kwargs`, allowing the user to set default parameters for snapshot comments. Also made `save=True` the default and allowed `# pyta: snapshot` to be accepted.
 - Renamed the options for `snapshot` subcommand in `python_ta.debug` CLI to be plural.
 - Added `python_ta.debug.run_with_snapshot_tracer` and a `trace` subcommand for the `python_ta.debug` CLI (`python -m python_ta.debug trace FILE`), which both trace the file with `SnapshotTracer`.
+- Extended `Z3Environment.assign` to track constraints on local variables
 - Added `# pyta: snapshot-tracer-start` and `# pyta: snapshot-tracer-end` comments, which mark the block of code traced by `python_ta.debug.run_with_snapshot_tracer` and the `trace` subcommand of the `python_ta.debug` CLI.
 
 ### 💫 New checkers
@@ -51,6 +52,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Fixed `OneIterationChecker` crashing with an `IndexError` when the `z3` option is enabled and a loop is the last statement in a function
 - Fixed `Z3Parser.parse_subscript_op` to handle negative string indexing
 - Fixed missing `redundant-condition` reports on reassigned variables by adding versioning
+- Added index size constraints to `Z3Parser` for string indexing
 
 ### 🔧 Internal changes
 

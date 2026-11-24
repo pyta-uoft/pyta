@@ -215,6 +215,65 @@ if condition():
     pass
 ```
 
+(W0127)=
+
+### Self-assigning variable (W0127)
+
+This error occurs when a variable is assigned to itself, which has no effect.
+
+```{literalinclude} /../../../examples/pylint/w0127_self_assigning_variable.py
+
+```
+
+Corrected version:
+
+```python
+x = 1
+
+y = x
+```
+
+(W0129)=
+
+### Assert on string literal (W0129)
+
+This error occurs when the first argument of an `assert` statement is a string literal. Any
+non-empty string literal always evaluates to `True`. Use a boolean condition as the first argument
+and, if desired, provide the string as the assertion message.
+
+```{literalinclude} /../../../examples/pylint/w0129_assert_on_string_literal.py
+
+```
+
+Corrected version:
+
+```python
+succeeded = True
+assert succeeded, "The operation did not succeed."
+```
+
+(W0143)=
+
+### Comparison with callable (W0143)
+
+This error occurs when a value is compared with a function or another callable. This often means
+that parentheses were omitted when the function should have been called.
+
+```{literalinclude} /../../../examples/pylint/w0143_comparison_with_callable.py
+
+```
+
+Corrected version:
+
+```python
+def get_course_code() -> str:
+    return "CSC148"
+
+
+if "CSC148" == get_course_code():
+    print("Nice")
+```
+
 (E1123)=
 
 ### Unexpected keyword arg (E1123)
@@ -1809,6 +1868,25 @@ would like to import. For example, if we have a Python file named `math.py`, cal
 from within that file (or from within _any_ Python file in the same directory) will import _
 our_ `math.py` file, and not the [`math` module] from the standard library.
 
+(W0410)=
+
+### Misplaced future import (W0410)
+
+This error occurs when a `__future__` import is not the first statement in a module, apart from the
+module docstring. Place future imports before all other imports and statements.
+
+```{literalinclude} /../../../examples/pylint/w0410_misplaced_future.py
+
+```
+
+Corrected version:
+
+```python
+from __future__ import print_function
+
+import sys
+```
+
 (W0416)=
 
 ### Shadowed import (W0416)
@@ -2146,6 +2224,27 @@ any time, which makes external code which uses those attributes or methods fragi
 modifying a private attribute or calling a private method may lead to undefined behavior from the
 class.
 
+(W0231)=
+
+### Super init not called (W0231)
+
+This error occurs when a subclass defines an `__init__` method without calling the `__init__`
+method of a base class that also defines one. Call the base initializer so that the inherited part
+of the object is initialized.
+
+```{literalinclude} /../../../examples/pylint/w0231_super_init_not_called.py
+
+```
+
+Corrected version:
+
+```python
+class Derived(Base):
+    def __init__(self) -> None:
+        super().__init__()
+        print("Derived init")
+```
+
 (W0233)=
 
 ### Bad parent init (W0233)
@@ -2182,6 +2281,71 @@ class Child(Parent):
 - [Super considered super!]
 - [Python's super considered harmful]
 - [StackOverflow: What does 'super' do in Python?]
+
+(W0237)=
+
+### Arguments renamed (W0237)
+
+This error occurs when an overriding method renames a parameter from the method it overrides.
+Keeping parameter names consistent preserves calls that pass arguments by keyword and makes the
+relationship between the methods clear.
+
+```{literalinclude} /../../../examples/pylint/w0237_arguments_renamed.py
+
+```
+
+Corrected version:
+
+```python
+class CSStudent(Student):
+    """A computer science student."""
+
+    def introduce(self, name: str) -> str:
+        """Return an introduction for name."""
+        return f"Hello, my name is {name}, and I study computer science."
+```
+
+(W0239)=
+
+### Overridden final method (W0239)
+
+This error occurs when a subclass overrides a method decorated with `typing.final`. A final method
+is not intended to be overridden; use the inherited implementation or remove `@final` from the base
+method if overriding should be supported.
+
+```{literalinclude} /../../../examples/pylint/w0239_overridden_final_method.py
+
+```
+
+Corrected version (using the inherited final method):
+
+```python
+class CSStudent(Student):
+    """A computer science student that uses the inherited program getter."""
+```
+
+(W0240)=
+
+### Subclassed final class (W0240)
+
+This error occurs when a class inherits from a class decorated with `typing.final`. A final class is
+not intended to be subclassed; use the final class directly or remove `@final` if inheritance should
+be supported.
+
+```{literalinclude} /../../../examples/pylint/w0240_subclassed_final_class.py
+
+```
+
+Corrected version (allowing the class to be subclassed):
+
+```python
+class Student:
+    """A student class that can be subclassed."""
+
+
+class CSStudent(Student):
+    """A computer science student."""
+```
 
 (W0245)=
 
@@ -2557,6 +2721,58 @@ def error_code(error_codes):
         return error_codes[1]
 
     return error_codes[2]
+```
+
+(W0136)=
+
+### Continue in finally (W0136)
+
+This error occurs when a `continue` statement exits a `finally` clause. It can hide a pending
+exception or other control flow from the corresponding `try` clause, making the program's behaviour
+difficult to follow. Handle expected exceptions in an `except` clause and place the `continue`
+statement in an `else` clause so that it runs only when the `try` clause succeeds.
+
+```{literalinclude} /../../../examples/pylint/w0136_continue_in_finally.py
+
+```
+
+Corrected version:
+
+```python
+def print_items(items: list[str]) -> None:
+    """Print each item in items."""
+    for item in items:
+        try:
+            print(item)
+        except OSError:
+            print("Could not print item.")
+        else:
+            continue
+```
+
+(W0137)=
+
+### Break in finally (W0137)
+
+This error occurs when a `break` statement exits a `finally` clause. It can hide a pending exception
+or other control flow from the corresponding `try` clause, making the program's behaviour difficult
+to follow. Move the `break` statement after the `finally` clause.
+
+```{literalinclude} /../../../examples/pylint/w0137_break_in_finally.py
+
+```
+
+Corrected version:
+
+```python
+def print_first_item(items: list[str]) -> None:
+    """Print the first item in items."""
+    for item in items:
+        try:
+            print(item)
+        finally:
+            print("Finished processing item.")
+        break
 ```
 
 (W0702)=

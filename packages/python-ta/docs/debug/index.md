@@ -518,6 +518,34 @@ $ python -m python_ta.debug trace demo.py
 
 The `--include-frames`, `--exclude-frames` and `--exclude-vars` options take comma-separated lists, and are passed to `SnapshotTracer`.
 
+### Tracing part of a file
+
+To trace only some of the code, mark it with a `# pyta: snapshot-tracer-start` comment and a `# pyta: snapshot-tracer-end` comment. `run_with_snapshot_tracer` and the `trace` subcommand then run the file as if only the statements between the comments were inside a `with SnapshotTracer(...)` block:
+
+```python
+# demo.py
+def sum_squares(numbers: list[int]) -> int:
+    squares = []
+    # pyta: snapshot-tracer-start
+    for n in numbers:
+        squares.append(n * n)
+    # pyta: snapshot-tracer-end
+    return sum(squares)
+
+
+sum_squares([1, 2, 3])
+```
+
+The code between the comments is indented under a `with` statement, so the comments must follow these rules:
+
+- Each comment must be on a line by itself.
+- The start comment must be directly followed by a statement.
+- Both comments must be in the same block of code. For example, the start comment cannot be in an `if` branch with the end comment in its `else` branch.
+
+If a comment breaks one of these rules, or is missing its matching start or end comment, a `SyntaxError` is raised that points to that comment.
+
+If there is no code between the comments, the file runs without tracing anything. If there is more than one pair of comments, only the first start comment and the first end comment after it are used, and any other `snapshot-tracer` comments are ignored.
+
 ### API
 
 ```{eval-rst}

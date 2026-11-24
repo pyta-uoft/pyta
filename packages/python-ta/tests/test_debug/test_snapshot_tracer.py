@@ -18,6 +18,8 @@ SNAPSHOT_DIR = os.path.join(
 )
 MEMORY_VIZ_ARGS = ["--roughjs-config", "seed=12345"]
 MEMORY_VIZ_VERSION = "0.5.0"
+START = "# pyta: snapshot-tracer-start"
+END = "# pyta: snapshot-tracer-end"
 
 
 # Function inputs for testing the SnapshotTracer
@@ -480,6 +482,18 @@ class TestRunWithSnapshotTracer:
 
         assert tracer._get_code() == expected_code
 
+    def test_webstepper_code_includes_lines_not_run(self, tmp_path):
+        """
+        Test that the code shown in the Webstepper includes the whole file, including a branch
+        that is not run.
+        """
+        path = tmp_path / "demo.py"
+        path.write_text("if True:\n    x = 1\nelse:\n    x = 2\n", encoding="utf-8")
+
+        tracer = run_with_snapshot_tracer(str(path), webstepper=False)
+
+        assert tracer._get_code() == ("if True:\n    x = 1\nelse:\n    x = 2", 1)
+
     def test_error_points_to_original_line(self, tmp_path):
         """
         Test that an error raised by the traced file is reported at the file's original path
@@ -539,3 +553,121 @@ class TestRunWithSnapshotTracer:
         mock_tracer.assert_called_once_with(
             webstepper=False, include_frames=["f"], exclude_vars=["x"]
         )
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
+class TestSnapshotTracerComments:
+    """
+    Tests for the "# pyta: snapshot-tracer-start" and "# pyta: snapshot-tracer-end" comments
+    used by run_with_snapshot_tracer. These tests are skipped if the Python version is less
+    than 3.10.
+    """
+
+    # The start comment's line is traced too: the `with` block that replaces the marked
+    # statements is placed on that line, and takes a snapshot there when it exits.
+    @pytest.mark.parametrize(
+        "source, expected_code, expected_lines",
+        [
+            # A block at the module level
+            (
+                f"x = 1\n{START}\ny = 2\nz = 3\n{END}\nw = 4\n",
+                ("y = 2\nz = 3", 3),
+                {2, 3, 4},
+            ),
+            # A block inside a function body, with a branch that is not run
+            (
+                f"def f(n):\n    a = 1\n    {START}\n    if n <= 0:\n        x = 1\n    else:\n"
+                f"        x = 3\n    {END}\n    return x\nf(0)\n",
+                ("    if n <= 0:\n        x = 1\n    else:\n        x = 3", 4),
+                {3, 4, 5},
+            ),
+            # A block starting with a decorated function
+            (
+                f"import functools\n{START}\n@functools.cache\ndef g():\n"
+                f"    return 1\ng()\n{END}\nh = 1\n",
+                ("@functools.cache\ndef g():\n    return 1\ng()", 3),
+                {2, 3, 4, 5, 6},
+            ),
+            # Only the first start comment and the first end comment after it are used
+            (
+                f"{END}\na = 1\n{START}\nb = 2\n{END}\nc = 3\n{START}\nd = 4\n{END}\n",
+                ("b = 2", 4),
+                {3, 4},
+            ),
+            # Blank lines, other comments and a semicolon in the block
+            (
+                f"{START}\n\n# comment\na = 1;\n\n{END}\nb = 2\n",
+                ("\n# comment\na = 1;", 2),
+                {1, 4},
+            ),
+        ],
+    )
+    def test_traces_only_marked_block(self, tmp_path, source, expected_code, expected_lines):
+        """
+        Test that exactly the statements between the snapshot-tracer comments are traced, and
+        that the code shown in the Webstepper is the whole marked block, including lines that
+        are not run.
+
+        Traced lines are compared as a set because the order and repeats of line events
+        differ between Python versions (e.g., for decorators).
+        """
+        path = tmp_path / "demo.py"
+        path.write_text(source, encoding="utf-8")
+
+        tracer = run_with_snapshot_tracer(str(path), webstepper=False)
+
+        traced_lines = {snapshot_entry["lineNumber"] for snapshot_entry in tracer.snapshots}
+        assert tracer._get_code() == expected_code
+        assert traced_lines == expected_lines
+
+    def test_empty_block_traces_nothing(self, tmp_path):
+        """
+        Test that the file runs without tracing anything when there is no code between the
+        snapshot-tracer comments.
+        """
+        path = tmp_path / "demo.py"
+        path.write_text(f"a = 1\n{START}\n\n# comment\n{END}\n", encoding="utf-8")
+
+        tracer = run_with_snapshot_tracer(str(path), webstepper=False)
+
+        assert tracer.snapshots == []
+
+    @pytest.mark.parametrize(
+        "source, message, line",
+        [
+            (f"a = 1  {START}\n{END}\n", "on a line by itself", 1),
+            (f"{START}\na = 1\n", "has no matching snapshot-tracer-end", 1),
+            (f"a = 1\n{END}\n", "has no matching snapshot-tracer-start", 2),
+            # A start comment before an `else:`
+            (
+                f"if True:\n    a = 1\n{START}\nelse:\n    b = 1\n{END}\n",
+                "must be directly followed by a statement",
+                3,
+            ),
+            # An end comment in the `else` branch of the start comment's `if`
+            (
+                f"if True:\n    {START}\n    a = 1\nelse:\n    {END}\n    b = 1\n",
+                "must be in the same block",
+                5,
+            ),
+            # An end comment after a complete statement in a different block
+            (
+                f"def f():\n    {START}\n    a = 1\nb = 2\n{END}\n",
+                "must be in the same block",
+                5,
+            ),
+        ],
+    )
+    def test_invalid_comments_raise(self, tmp_path, source, message, line):
+        """
+        Test that snapshot-tracer comments that do not mark a block of statements raise a
+        SyntaxError pointing at the comment at fault.
+        """
+        path = tmp_path / "demo.py"
+        path.write_text(source, encoding="utf-8")
+
+        with pytest.raises(SyntaxError, match=message) as exc_info:
+            run_with_snapshot_tracer(str(path), webstepper=False)
+
+        assert exc_info.value.filename == str(path)
+        assert exc_info.value.lineno == line

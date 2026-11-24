@@ -18,6 +18,7 @@ MISSING_DOCSTRING_FIXTURE_PATH = str(
 DEPRECATED_ATTRIBUTE_FIXTURE_PATH = str(
     Path(FIXTURE_PATH).with_name("lsp_reporter_deprecated_attribute.py")
 )
+UNICODE_FIXTURE_PATH = str(Path(FIXTURE_PATH).with_name("lsp_reporter_unicode.py"))
 
 
 @pytest.fixture()
@@ -29,6 +30,7 @@ def lsp_output():
             FIXTURE_PATH,
             MISSING_DOCSTRING_FIXTURE_PATH,
             DEPRECATED_ATTRIBUTE_FIXTURE_PATH,
+            UNICODE_FIXTURE_PATH,
         ],
         config={"output-format": "pyta-lsp"},
         output=buf,
@@ -45,14 +47,14 @@ def test_exact_output(lsp_output):
             "diagnostics": [
                 {
                     "range": {
-                        "start": {"line": 5, "character": 17},
-                        "end": {"line": 5, "character": 26},
+                        "start": {"line": 5, "character": 4},
+                        "end": {"line": 5, "character": 5},
                     },
-                    "message": "Undefined variable 'undefined'",
-                    "severity": 1,
-                    "code": "E0602",
+                    "message": "The variable x is unused and can be removed. If you intended to use it, there may be a typo elsewhere in the code.",
+                    "severity": 2,
+                    "code": "W0612",
                     "codeDescription": {
-                        "href": "https://www.cs.toronto.edu/~david/pyta/checkers/index.html#e0602"
+                        "href": "https://www.cs.toronto.edu/~david/pyta/checkers/index.html#w0612"
                     },
                     "source": "python-ta",
                 }
@@ -114,3 +116,14 @@ def test_unicode_module_diagnostic_highlights_only_first_line(mocker):
     assert message.column == 0
     assert message.end_line == 1
     assert message.end_column == 2
+
+
+def test_unicode_diagnostic_range(lsp_output):
+    """Test that a Pylint byte range is converted to an LSP UTF-16 range."""
+    diagnostics = lsp_output[3]["diagnostics"]
+    diagnostic = next(diag for diag in diagnostics if diag["code"] == "E0602")
+
+    assert diagnostic["range"] == {
+        "start": {"line": 5, "character": 18},
+        "end": {"line": 5, "character": 27},
+    }

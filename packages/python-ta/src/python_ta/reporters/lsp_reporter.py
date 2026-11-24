@@ -64,7 +64,6 @@ class LSPReporter(PythonTaReporter):
                 self.source_lines[end_line - 1],
                 msg.end_column,
                 msg.symbol,
-                is_end=True,
             )
 
         # Highlight only the first line of full-module messages

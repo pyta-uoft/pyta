@@ -2,5 +2,5 @@
 
 
 def fun() -> None:
-    """Return an expression containing an undefined variable."""
-    return "é" + undefined
+    """Sets the variable x equal to 1"""
+    x = 1

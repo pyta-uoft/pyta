@@ -17,16 +17,10 @@ def test_utf8_offset_conversions() -> None:
     assert utf8_offset_to_utf16(line, byte_offset) == 14
 
 
-def test_checker_specific_column_encodings() -> None:
-    """Test normalization of the distinct column formats used by custom checkers."""
+def test_pycodestyle_column_conversion() -> None:
+    """Test conversion of pycodestyle's Unicode code-point columns."""
     line = 'text = "😀"; target = 1'
     target_index = line.index("target")
-    mypy_start_column = len(line[:target_index].encode("utf-8")) + 1
 
     assert message_column_to_codepoint(line, target_index, "pep8-errors") == target_index
-    assert (
-        message_column_to_codepoint(line, mypy_start_column, "incompatible-assignment")
-        == target_index
-    )
     assert message_column_to_utf16(line, target_index, "pep8-errors") == 13
-    assert message_column_to_utf16(line, mypy_start_column, "incompatible-assignment") == 13

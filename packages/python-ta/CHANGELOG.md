@@ -52,6 +52,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Fixed `Z3Parser.parse_subscript_op` to handle negative string indexing
 - Fixed missing `redundant-condition` reports on reassigned variables by adding versioning
 - Added index size constraints to `Z3Parser` for string indexing
+- Fixed the HTML report's Table of Contents sidebar expanding to half the page width and overlapping the error output in some browsers (e.g., Safari)
 
 ### 🔧 Internal changes
 

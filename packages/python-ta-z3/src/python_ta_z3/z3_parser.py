@@ -313,12 +313,9 @@ class Z3Parser:
             return z3.Length(value) + index
         return index
 
-    def _clamp_forward_slice_index(
-        self, index: Union[int, z3.ArithRef], value: z3.SeqRef
-    ) -> z3.ArithRef:
-        """Clamp an index to the valid bounds for a string slice with a positive step."""
-        length = z3.Length(value)
-        return z3.If(index < 0, 0, z3.If(index > length, length, index))
+    def _clamp_slice_lower_bound(self, index: Union[int, z3.ArithRef]) -> z3.ArithRef:
+        """Clamp a negative lower bound to zero for string slicing."""
+        return z3.If(index < 0, 0, index)
 
     def parse_subscript_op(self, node: nodes.Subscript) -> z3.ExprRef:
         """
@@ -357,9 +354,7 @@ class Z3Parser:
 
             if step == 1:
                 if slice.lower is not None:
-                    lower = self._clamp_forward_slice_index(lower, value)
-                if slice.upper is not None:
-                    upper = self._clamp_forward_slice_index(upper, value)
+                    lower = self._clamp_slice_lower_bound(lower)
                 return z3.SubString(value, lower, upper - lower)
 
             # unhandled case: the upper bound is indeterminant

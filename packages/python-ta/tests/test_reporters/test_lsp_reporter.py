@@ -7,6 +7,7 @@ import pytest
 from lsprotocol.types import DiagnosticSeverity, DiagnosticTag
 
 from python_ta import check_all, doc
+from python_ta.reporters.lsp_reporter import LSPReporter
 
 FIXTURE_PATH = os.path.normpath(
     os.path.join(__file__, "../../fixtures/reporters/lsp_reporter_input.py")
@@ -17,6 +18,7 @@ MISSING_DOCSTRING_FIXTURE_PATH = str(
 DEPRECATED_ATTRIBUTE_FIXTURE_PATH = str(
     Path(FIXTURE_PATH).with_name("lsp_reporter_deprecated_attribute.py")
 )
+UNICODE_FIXTURE_PATH = str(Path(FIXTURE_PATH).with_name("lsp_reporter_unicode.py"))
 
 
 @pytest.fixture()
@@ -28,6 +30,7 @@ def lsp_output():
             FIXTURE_PATH,
             MISSING_DOCSTRING_FIXTURE_PATH,
             DEPRECATED_ATTRIBUTE_FIXTURE_PATH,
+            UNICODE_FIXTURE_PATH,
         ],
         config={"output-format": "pyta-lsp"},
         output=buf,
@@ -93,3 +96,34 @@ def test_deprecated_attribute_tag(lsp_output):
     diagnostic = next(diag for diag in diagnostics if diag["code"] == "W4906")
     assert diagnostic["tags"] == [DiagnosticTag.Deprecated]
     assert diagnostic["severity"] == DiagnosticSeverity.Warning
+
+
+def test_unicode_module_diagnostic_highlights_only_first_line(mocker):
+    """Test full-module range detection when the first and last lines contain Unicode."""
+    reporter = LSPReporter()
+    reporter.source_lines = ["😀", "é"]
+    message = mocker.Mock(
+        symbol="missing-module-docstring",
+        line=1,
+        column=0,
+        end_line=2,
+        end_column=2,
+    )
+
+    reporter._update_message_range(message)
+
+    assert message.line == 1
+    assert message.column == 0
+    assert message.end_line == 1
+    assert message.end_column == 2
+
+
+def test_unicode_diagnostic_range(lsp_output):
+    """Test that a Pylint byte range is converted to an LSP UTF-16 range."""
+    diagnostics = lsp_output[3]["diagnostics"]
+    diagnostic = next(diag for diag in diagnostics if diag["code"] == "E0602")
+
+    assert diagnostic["range"] == {
+        "start": {"line": 5, "character": 18},
+        "end": {"line": 5, "character": 27},
+    }

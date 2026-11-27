@@ -39,6 +39,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 
 ### 🐛 Bug fixes
 
+- Converted LSP diagnostic columns to UTF-16 code-unit offsets for Unicode source text.
 - Normalized static type checker message ranges to use zero-based start columns.
 - Raise a `FileNotFoundError` with informative message in `python_ta.debug.snapshot` when `npx` is not found on the PATH, preventing a subprocess from being spawned that will ultimately fail.
 - Fixed `DEBUG_CONTRACTS` logging the wrong attribute name when checking instance attribute types.

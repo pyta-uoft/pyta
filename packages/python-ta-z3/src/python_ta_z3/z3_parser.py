@@ -313,6 +313,10 @@ class Z3Parser:
             return z3.Length(value) + index
         return index
 
+    def _clamp_slice_lower_bound(self, index: Union[int, z3.ArithRef]) -> z3.ArithRef:
+        """Clamp a negative lower bound to zero for string slicing."""
+        return z3.If(index < 0, 0, index)
+
     def parse_subscript_op(self, node: nodes.Subscript) -> z3.ExprRef:
         """
         Convert an astroid Subscript node to z3 expression.
@@ -349,6 +353,8 @@ class Z3Parser:
                 raise Z3ParseException(f"Invalid slicing indexes {lower}, {upper}, {step}")
 
             if step == 1:
+                if slice.lower is not None:
+                    lower = self._clamp_slice_lower_bound(lower)
                 return z3.SubString(value, lower, upper - lower)
 
             # unhandled case: the upper bound is indeterminant

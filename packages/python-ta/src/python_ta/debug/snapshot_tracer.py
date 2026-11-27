@@ -6,12 +6,16 @@ import copy
 import inspect
 import logging
 import os
+import re
 import socket
 import sys
+import tokenize
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
+import asttokens
+from asttokens.util import Token
 from jinja2 import Environment, FileSystemLoader
 
 from ..util.servers.one_shot_server import open_html_in_browser
@@ -23,6 +27,17 @@ if TYPE_CHECKING:
     import types
 
 TRACER_ALIAS = "__snapshot_tracer__"
+
+TRACER_COMMENT_PATTERN = re.compile(r"#\s*pyta:\s*snapshot-tracer-(start|end)\s*")
+
+# Tokens that are not code, skipped when finding the code between the snapshot-tracer comments
+_NON_CODE_TOKEN_TYPES = (
+    tokenize.NL,
+    tokenize.NEWLINE,
+    tokenize.COMMENT,
+    tokenize.INDENT,
+    tokenize.DEDENT,
+)
 
 
 class SnapshotTracer:
@@ -214,8 +229,14 @@ class SnapshotTracer:
 
 
 def run_with_snapshot_tracer(path: str, **kwargs: Any) -> SnapshotTracer:
-    """Run the given Python file with all of its code traced by a SnapshotTracer, as if the
-    whole file were inside a `with SnapshotTracer(...):` block.
+    """Run the given Python file with its code traced by a SnapshotTracer.
+
+    If the file contains a "# pyta: snapshot-tracer-start" comment and a
+    "# pyta: snapshot-tracer-end" comment, only the statements between them are traced, as if
+    they were inside a `with SnapshotTracer(...):` block. Otherwise, the whole file is traced.
+
+    The two comments must each be on a line by themselves, and be in the same block of code.
+    Only the first start comment and the first end comment after it are used.
 
     The Webstepper opens by default (webstepper=True) once the file finishes running.
 
@@ -226,21 +247,77 @@ def run_with_snapshot_tracer(path: str, **kwargs: Any) -> SnapshotTracer:
 
     Returns:
         The SnapshotTracer used to trace the file, which holds the snapshots taken.
+
+    Raises:
+        SyntaxError: If the snapshot-tracer comments are used incorrectly.
     """
     # utf-8-sig strips the BOM at the start of the file, which ast.parse would reject
     with open(path, encoding="utf-8-sig") as f:
         source = f.read()
 
-    tree = ast.parse(source, filename=path)
-    with_node = _wrap_module_in_tracer(tree)
+    tokens = asttokens.ASTTokens(source, parse=True, filename=path)
+    tree = tokens.tree
+    assert isinstance(tree, ast.Module)  # parse=True always builds the module tree
+
+    markers = _find_tracer_comments(tokens, path)
+    if markers is not None:
+        start, end = markers
+        with_node = _wrap_marked_block_in_tracer(tokens, start, end, path)
+    else:
+        with_node = _wrap_module_in_tracer(tree)
     code = compile(tree, filename=path, mode="exec")
 
     tracer = SnapshotTracer(**{"webstepper": True, **kwargs})
     if with_node is not None:
         tracer._start_lineno = with_node.lineno + 1
+        tracer._end_lineno = with_node.end_lineno or 0
 
     exec_as_main(code, path, {TRACER_ALIAS: tracer})
     return tracer
+
+
+def _find_tracer_comments(
+    tokens: asttokens.ASTTokens, filename: str
+) -> Optional[tuple[Token, Token]]:
+    """Return the first "# pyta: snapshot-tracer-start" comment token in the file and the
+    first "# pyta: snapshot-tracer-end" comment token after it. Any other snapshot-tracer
+    comments are ignored.
+
+    Return None if there are no snapshot-tracer comments.
+
+    Raise a SyntaxError pointing at the comment at fault if the start comment has no end
+    comment after it, an end comment has no start comment, or either of the two comments
+    is not on a line by itself.
+
+    Args:
+        tokens: The tokens of the file.
+        filename: The path to the file, used in error messages.
+    """
+    starts: list[Token] = []
+    ends: list[Token] = []
+    for tok in tokens.tokens:
+        if tok.type == tokenize.COMMENT and (match := TRACER_COMMENT_PATTERN.fullmatch(tok.string)):
+            (starts if match.group(1) == "start" else ends).append(tok)
+    if not starts and not ends:
+        return None
+
+    if not starts:
+        raise _comment_error(
+            ends[0], "snapshot-tracer-end has no matching snapshot-tracer-start", filename
+        )
+    start = starts[0]
+    end = next((tok for tok in ends if tok.index > start.index), None)
+    if end is None:
+        raise _comment_error(
+            start, "snapshot-tracer-start has no matching snapshot-tracer-end", filename
+        )
+
+    for tok in (start, end):
+        if tok.line[: tok.start[1]].strip():
+            raise _comment_error(
+                tok, "a snapshot-tracer comment must be on a line by itself", filename
+            )
+    return start, end
 
 
 def _wrap_module_in_tracer(tree: ast.Module) -> Optional[ast.With]:
@@ -267,26 +344,7 @@ def _wrap_module_in_tracer(tree: ast.Module) -> Optional[ast.With]:
     first_lineno = min(
         [first.lineno] + [decorator.lineno for decorator in getattr(first, "decorator_list", [])]
     )
-    with_lineno = first_lineno - 1
-
-    # The variable TRACER_ALIAS to be used in the `with` statement
-    tracer_name = ast.Name(
-        id=TRACER_ALIAS,
-        ctx=ast.Load(),
-        lineno=with_lineno,
-        col_offset=0,
-        end_lineno=with_lineno,
-        end_col_offset=0,
-    )
-    # The `with` statement that wraps the module body
-    with_node = ast.With(
-        items=[ast.withitem(context_expr=tracer_name)],
-        body=wrapped,
-        lineno=with_lineno,
-        col_offset=0,
-        end_lineno=wrapped[-1].end_lineno,
-        end_col_offset=wrapped[-1].end_col_offset,
-    )
+    with_node = _build_with_tracer_statement(wrapped, first_lineno - 1, 0)
     tree.body = header + [with_node]
     return with_node
 
@@ -315,3 +373,122 @@ def _get_num_header_statements(body: list[ast.stmt]) -> int:
             break
         num_header += 1
     return num_header
+
+
+def _wrap_marked_block_in_tracer(
+    tokens: asttokens.ASTTokens, start: Token, end: Token, filename: str
+) -> Optional[ast.With]:
+    """Wrap the statements between the "# pyta: snapshot-tracer-start" and
+    "# pyta: snapshot-tracer-end" comments in a `with` block using the tracer named
+    TRACER_ALIAS, and return the new `with` node. Mutates the parsed file, replacing the
+    marked statements with the `with` block.
+
+    Return None (and leave the tree unchanged) if there is no code between the comments, so
+    that nothing is traced.
+
+    Raise a SyntaxError pointing at the comment at fault if the code between the comments is
+    not a run of whole statements in one block.
+
+    Args:
+        tokens: The tokens and parsed tree of the file.
+        start: The snapshot-tracer-start comment token.
+        end: The snapshot-tracer-end comment token, which comes after start.
+        filename: The path to the file, used in error messages.
+    """
+    code = [
+        tok
+        for tok in tokens.tokens[start.index + 1 : end.index]
+        if tok.type not in _NON_CODE_TOKEN_TYPES and tok.string != ";"
+    ]
+    if not code:
+        return None
+
+    # The start comment must be directly followed by a statement
+    assert tokens.tree is not None  # parse=True always builds the tree
+    location = _find_statement_starts(tokens.tree).get(code[0].index)
+    if location is None:
+        raise _comment_error(
+            start, "snapshot-tracer-start must be directly followed by a statement", filename
+        )
+
+    # The end comment must directly follow a statement in the same block
+    statements, first = location
+    last = next(
+        (
+            i
+            for i in range(first, len(statements))
+            if statements[i].last_token.index == code[-1].index  # type: ignore[attr-defined]
+        ),
+        None,
+    )
+    if last is None:
+        raise _comment_error(
+            end,
+            "snapshot-tracer-end must be in the same block as snapshot-tracer-start, "
+            "right after a statement",
+            filename,
+        )
+
+    wrapped = slice(first, last + 1)
+    line, col = start.start
+    with_node = _build_with_tracer_statement(statements[wrapped], line, col)
+    statements[wrapped] = [with_node]
+    return with_node
+
+
+def _comment_error(tok: Token, msg: str, filename: str) -> SyntaxError:
+    """Return a SyntaxError with the given message that points at the comment token tok.
+
+    Args:
+        tok: The comment token at fault.
+        msg: The error message.
+        filename: The path to the file, used in the error.
+    """
+    line, col = tok.start
+    return SyntaxError(msg, (filename, line, col + 1, tok.line))
+
+
+def _build_with_tracer_statement(body: list[ast.stmt], lineno: int, col_offset: int) -> ast.With:
+    """Return a `with` statement using the tracer named TRACER_ALIAS that wraps the given
+    statements, placed at the given line and column.
+
+    Args:
+        body: The statements to wrap. Must not be empty.
+        lineno: The line number of the `with` statement.
+        col_offset: The column of the `with` statement.
+    """
+    tracer_name = ast.Name(
+        id=TRACER_ALIAS,
+        ctx=ast.Load(),
+        lineno=lineno,
+        col_offset=col_offset,
+        end_lineno=lineno,
+        end_col_offset=col_offset,
+    )
+    return ast.With(
+        items=[ast.withitem(context_expr=tracer_name)],
+        body=body,
+        lineno=lineno,
+        col_offset=col_offset,
+        end_lineno=body[-1].end_lineno,
+        end_col_offset=body[-1].end_col_offset,
+    )
+
+
+def _find_statement_starts(tree: ast.AST) -> dict[int, tuple[list[ast.stmt], int]]:
+    """Return a mapping from the index of each statement's first token (including any
+    decorators) to the list of statements holding it and its index in that list.
+
+    Args:
+        tree: A tree parsed by asttokens, so each statement has a first_token.
+    """
+    starts = {}
+    # Visit every node in the tree
+    for node in ast.walk(tree):
+        # Blocks of statements are stored in these fields on AST nodes
+        for field in ("body", "orelse", "finalbody"):
+            stmts = getattr(node, field, None)
+            if isinstance(stmts, list):
+                for index, stmt in enumerate(stmts):
+                    starts[stmt.first_token.index] = (stmts, index)  # type: ignore[attr-defined]
+    return starts

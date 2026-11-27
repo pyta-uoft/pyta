@@ -24,6 +24,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Renamed the options for `snapshot` subcommand in `python_ta.debug` CLI to be plural.
 - Added `python_ta.debug.run_with_snapshot_tracer` and a `trace` subcommand for the `python_ta.debug` CLI (`python -m python_ta.debug trace FILE`), which both trace the file with `SnapshotTracer`.
 - Extended `Z3Environment.assign` to track constraints on local variables
+- Added `# pyta: snapshot-tracer-start` and `# pyta: snapshot-tracer-end` comments, which mark the block of code traced by `python_ta.debug.run_with_snapshot_tracer` and the `trace` subcommand of the `python_ta.debug` CLI.
 
 ### 💫 New checkers
 

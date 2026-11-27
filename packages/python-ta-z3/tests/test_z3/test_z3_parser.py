@@ -94,6 +94,11 @@ def test_apply_mod_floordiv_reject_non_ints(left, right) -> None:
         ("python[-4:-1]", "tho"),
         ("python[-4:]", "thon"),
         ("python[:-1]", "pytho"),
+        ("python[-10::1]", "python"),
+        ("python[-10:-1:1]", "pytho"),
+        ("python[:-10:1]", ""),
+        ("python[10::1]", ""),
+        ("python[:10:1]", "python"),
     ],
 )
 def test_parse_subscript_op_with_negative_indexes(source, expected) -> None:

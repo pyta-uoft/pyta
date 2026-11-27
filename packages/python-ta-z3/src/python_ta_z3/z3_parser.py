@@ -313,6 +313,13 @@ class Z3Parser:
             return z3.Length(value) + index
         return index
 
+    def _clamp_forward_slice_index(
+        self, index: Union[int, z3.ArithRef], value: z3.SeqRef
+    ) -> z3.ArithRef:
+        """Clamp an index to the valid bounds for a string slice with a positive step."""
+        length = z3.Length(value)
+        return z3.If(index < 0, 0, z3.If(index > length, length, index))
+
     def parse_subscript_op(self, node: nodes.Subscript) -> z3.ExprRef:
         """
         Convert an astroid Subscript node to z3 expression.
@@ -349,6 +356,10 @@ class Z3Parser:
                 raise Z3ParseException(f"Invalid slicing indexes {lower}, {upper}, {step}")
 
             if step == 1:
+                if slice.lower is not None:
+                    lower = self._clamp_forward_slice_index(lower, value)
+                if slice.upper is not None:
+                    upper = self._clamp_forward_slice_index(upper, value)
                 return z3.SubString(value, lower, upper - lower)
 
             # unhandled case: the upper bound is indeterminant

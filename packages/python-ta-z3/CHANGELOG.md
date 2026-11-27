@@ -14,6 +14,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 🐛 Bug fixes
 
 - Edited `Z3Parser.parse` to convert Python constants into corresponding Z3 expressions
+- Edited `Z3Parser.parse_subscript_op` to correctly clamp bounds in string slicing
 
 ### 🔧 Internal changes
 
